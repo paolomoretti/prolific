@@ -65,83 +65,80 @@ describe "Prolific", ->
 
   describe "assumption matchers", ->
 
-    it "should have a method to match an assumption", ->
-      expect(instance.getMatcher).toBeDefined()
-      expect(typeof instance.getMatcher).toBe "function"
 
     describe "matcher 'is greater|lower than'", ->
 
       it "should catch 'a is greater than b' assumption", ->
-        matcher = instance.getMatcher "2 is greater than 1"
+        found = instance.finder "2 is greater than 1", instance.matchers
 
-        expect(matcher).toBe instance.matchers["is greater|lower than"]
-        expect(matcher.cond).toBe "greater"
+        expect(found.item).toBe instance.matchers["is greater|lower than"]
+        expect(found.vars[0]).toBe "greater"
 
       it "should catch 'a is lower than b' assumption", ->
-        matcher = instance.getMatcher "2 is lower than 4"
+        found = instance.finder "2 is lower than 4", instance.matchers
 
-        expect(matcher).toBe instance.matchers["is greater|lower than"]
-        expect(matcher.cond).toBe "lower"
+        expect(found.item).toBe instance.matchers["is greater|lower than"]
+        expect(found.vars[0]).toBe "lower"
 
       it "should catch 'a is > than b' assumption", ->
-        matcher = instance.getMatcher "2 is > than 4"
+        found = instance.finder "2 is > than 4", instance.matchers
 
-        expect(matcher).toBe instance.matchers["is greater|lower than"]
-        expect(matcher.cond).toBe ">"
+        expect(found.item).toBe instance.matchers["is greater|lower than"]
+        expect(found.vars[0]).toBe ">"
 
       it "should catch 'a is < than b' assumption", ->
-        matcher = instance.getMatcher "2 is < than 4"
+        found = instance.finder "2 is < than 4", instance.matchers
 
-        expect(matcher).toBe instance.matchers["is greater|lower than"]
-        expect(matcher.cond).toBe "<"
+        expect(found.item).toBe instance.matchers["is greater|lower than"]
+        expect(found.vars[0]).toBe "<"
 
       it "should not catch 'a is bigger than b' assumption", ->
-        matcher = instance.getMatcher "2 is bigger than 4"
+        found = instance.finder "2 is bigger than 4", instance.matchers
 
-        expect(matcher).not.toBe instance.matchers["is greater|lower than"]
+        expect(found.item).not.toBe instance.matchers["is greater|lower than"]
 
 
     describe "matcher 'is|isnt'", ->
 
       it "should catch 'a is b' assumption", ->
-        matcher = instance.getMatcher "2 is 2"
+        found = instance.finder "2 is 2", instance.matchers
 
-        expect(matcher).toBe instance.matchers["is|isnt"]
-        expect(matcher.cond).toBe "is"
+        expect(found.item).toBe instance.matchers["is|isnt"]
+        expect(found.vars[0]).toBe "is"
 
       it "should catch 'a isnt b' assumption", ->
-        matcher = instance.getMatcher "2 isnt 2"
+        found = instance.finder "2 isnt 2", instance.matchers
 
-        expect(matcher).toBe instance.matchers["is|isnt"]
-        expect(matcher.cond).toBe "isnt"
+        expect(found.item).toBe instance.matchers["is|isnt"]
+        expect(found.vars[0]).toBe "isnt"
 
       it "should not catch 'a equal to b' assumption", ->
-        matcher = instance.getMatcher "2 equal to 2"
+        found = instance.finder "a equal to b", instance.matchers
 
-        expect(matcher).not.toBe instance.matchers["is|isnt"]
+        expect(found).not.toBeDefined()
 
 
     describe "matcher 'is|isnt an element'", ->
 
       it "should catch 'a is an element' assumption", ->
-        matcher = instance.getMatcher "2 is an element"
+        found = instance.finder "2 is an element", instance.matchers
 
-        expect(matcher).toBe instance.matchers["is|isnt an element"]
-        expect(matcher.cond).toBe "is"
+        expect(found.item).toBe instance.matchers["is|isnt an element"]
+        expect(found.vars[0]).toBe "is"
 
       it "should catch 'a isnt an element' assumption", ->
-        matcher = instance.getMatcher "2 isnt an element"
+        found = instance.finder "2 isnt an element", instance.matchers
 
-        expect(matcher).toBe instance.matchers["is|isnt an element"]
-        expect(matcher.cond).toBe "isnt"
+        expect(found.item).toBe instance.matchers["is|isnt an element"]
+        expect(found.vars[0]).toBe "isnt"
 
 
     describe "matcher 'is <query>'", ->
 
       it "should catch '$(query) is .classname' assumption", ->
-        matcher = instance.getMatcher "$('ciccio-pasticcio') is .ciccio-pasticcio"
+        found = instance.finder "$('ciccio-pasticcio') is .ciccio-pasticcio", instance.matchers
 
-        expect(matcher.cond).toBe "is"
+        expect(found.vars[0]).toBe "is"
 
 
   describe "assume", ->

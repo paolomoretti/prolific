@@ -63,79 +63,75 @@ describe("Prolific", function() {
     });
   });
   describe("assumption matchers", function() {
-    it("should have a method to match an assumption", function() {
-      expect(instance.getMatcher).toBeDefined();
-      return expect(typeof instance.getMatcher).toBe("function");
-    });
     describe("matcher 'is greater|lower than'", function() {
       it("should catch 'a is greater than b' assumption", function() {
-        var matcher;
-        matcher = instance.getMatcher("2 is greater than 1");
-        expect(matcher).toBe(instance.matchers["is greater|lower than"]);
-        return expect(matcher.cond).toBe("greater");
+        var found;
+        found = instance.finder("2 is greater than 1", instance.matchers);
+        expect(found.item).toBe(instance.matchers["is greater|lower than"]);
+        return expect(found.vars[0]).toBe("greater");
       });
       it("should catch 'a is lower than b' assumption", function() {
-        var matcher;
-        matcher = instance.getMatcher("2 is lower than 4");
-        expect(matcher).toBe(instance.matchers["is greater|lower than"]);
-        return expect(matcher.cond).toBe("lower");
+        var found;
+        found = instance.finder("2 is lower than 4", instance.matchers);
+        expect(found.item).toBe(instance.matchers["is greater|lower than"]);
+        return expect(found.vars[0]).toBe("lower");
       });
       it("should catch 'a is > than b' assumption", function() {
-        var matcher;
-        matcher = instance.getMatcher("2 is > than 4");
-        expect(matcher).toBe(instance.matchers["is greater|lower than"]);
-        return expect(matcher.cond).toBe(">");
+        var found;
+        found = instance.finder("2 is > than 4", instance.matchers);
+        expect(found.item).toBe(instance.matchers["is greater|lower than"]);
+        return expect(found.vars[0]).toBe(">");
       });
       it("should catch 'a is < than b' assumption", function() {
-        var matcher;
-        matcher = instance.getMatcher("2 is < than 4");
-        expect(matcher).toBe(instance.matchers["is greater|lower than"]);
-        return expect(matcher.cond).toBe("<");
+        var found;
+        found = instance.finder("2 is < than 4", instance.matchers);
+        expect(found.item).toBe(instance.matchers["is greater|lower than"]);
+        return expect(found.vars[0]).toBe("<");
       });
       return it("should not catch 'a is bigger than b' assumption", function() {
-        var matcher;
-        matcher = instance.getMatcher("2 is bigger than 4");
-        return expect(matcher).not.toBe(instance.matchers["is greater|lower than"]);
+        var found;
+        found = instance.finder("2 is bigger than 4", instance.matchers);
+        return expect(found.item).not.toBe(instance.matchers["is greater|lower than"]);
       });
     });
     describe("matcher 'is|isnt'", function() {
       it("should catch 'a is b' assumption", function() {
-        var matcher;
-        matcher = instance.getMatcher("2 is 2");
-        expect(matcher).toBe(instance.matchers["is|isnt"]);
-        return expect(matcher.cond).toBe("is");
+        var found;
+        found = instance.finder("2 is 2", instance.matchers);
+        expect(found.item).toBe(instance.matchers["is|isnt"]);
+        return expect(found.vars[0]).toBe("is");
       });
       it("should catch 'a isnt b' assumption", function() {
-        var matcher;
-        matcher = instance.getMatcher("2 isnt 2");
-        expect(matcher).toBe(instance.matchers["is|isnt"]);
-        return expect(matcher.cond).toBe("isnt");
+        var found;
+        found = instance.finder("2 isnt 2", instance.matchers);
+        expect(found.item).toBe(instance.matchers["is|isnt"]);
+        return expect(found.vars[0]).toBe("isnt");
       });
       return it("should not catch 'a equal to b' assumption", function() {
-        var matcher;
-        matcher = instance.getMatcher("2 equal to 2");
-        return expect(matcher).not.toBe(instance.matchers["is|isnt"]);
+        var found;
+        found = instance.finder("a equal to b", instance.matchers);
+        return expect(found).not.toBeDefined();
       });
     });
     describe("matcher 'is|isnt an element'", function() {
       it("should catch 'a is an element' assumption", function() {
-        var matcher;
-        matcher = instance.getMatcher("2 is an element");
-        expect(matcher).toBe(instance.matchers["is|isnt an element"]);
-        return expect(matcher.cond).toBe("is");
+        var found;
+        found = instance.finder("2 is an element", instance.matchers);
+        expect(found.item).toBe(instance.matchers["is|isnt an element"]);
+        return expect(found.vars[0]).toBe("is");
       });
       return it("should catch 'a isnt an element' assumption", function() {
-        var matcher;
-        matcher = instance.getMatcher("2 isnt an element");
-        expect(matcher).toBe(instance.matchers["is|isnt an element"]);
-        return expect(matcher.cond).toBe("isnt");
+        var found;
+        found = instance.finder("2 isnt an element", instance.matchers);
+        expect(found.item).toBe(instance.matchers["is|isnt an element"]);
+        return expect(found.vars[0]).toBe("isnt");
       });
     });
     return describe("matcher 'is <query>'", function() {
       return it("should catch '$(query) is .classname' assumption", function() {
-        var matcher;
-        matcher = instance.getMatcher("$('ciccio-pasticcio') is .ciccio-pasticcio");
-        return expect(matcher.cond).toBe("is");
+        var found;
+        found = instance.finder("$('ciccio-pasticcio') is .ciccio-pasticcio", instance.matchers);
+        return expect(found.vars[0]).toBe("is");
       });
     });
   });

@@ -3,18 +3,30 @@ var prolific;
 
 prolific = (function() {
   function prolific() {
-    var args, get_arguments, get_matcher, getters, matchers, pre_actions, run_matcher, schema, timer;
+    var args, finder, get_arguments, getters, matchers, pre_actions, run_matcher, schema, timer;
     schema = [];
     args = [];
     timer = 0;
+    ({
+      sentencer: {
+        "and|or": {
+          reg: /(.+) (and|or) (.+)/,
+          get: "$1,$3",
+          "var": "$2",
+          act: function() {
+            return false;
+          }
+        }
+      }
+    });
     matchers = {
       "is greater|lower than": {
         reg: /(.+) is (greater|lower|>|<) than (.+)/,
         get: "$1,$3",
         "var": "$2",
-        act: function() {
+        act: function(conf) {
           var _ref, _ref1;
-          if (((_ref = this.cond) === "greater" || _ref === ">") && (args[0] <= args[1] || args[0] > args[1] == false)) {
+          if (((_ref = conf.vars[0]) === "greater" || _ref === ">") && (args[0] <= args[1] || args[0] > args[1] == false)) {
             throw Error(arguments[0] + " (" + args[0] + ") is not greater than " + arguments[1] + " (" + args[1] + ")");
           }
           if (((_ref1 = this.cond) === "lower" || _ref1 === "<") && (args[0] >= args[1] || args[0] < args[1] == false)) {
@@ -26,11 +38,11 @@ prolific = (function() {
         reg: /(.+) (is|isnt) an (element)$/,
         get: "$1",
         "var": "$2",
-        act: function() {
-          if (args[0].size() === 0 && this.cond === "is") {
+        act: function(conf) {
+          if (args[0].size() === 0 && conf.vars[0] === "is") {
             throw Error(args[0] + " is not an element");
           }
-          if (args[0].size() > 0 && this.cond === "isnt") {
+          if (args[0].size() > 0 && conf.vars[0] === "isnt") {
             throw Error(args[0] + " is an element");
           }
         }
@@ -39,16 +51,17 @@ prolific = (function() {
         reg: /(.+) (is|isnt) (?!(greater than|lower than))(.+)/,
         get: "$1,$4",
         "var": "$2",
-        act: function() {
+        act: function(conf) {
           var res, testVal;
-          if (schema[0].getter === "jquery") {
+          console.log("schema", schema, conf);
+          if (schema[0].name === "jquery") {
             res = args[0].is(args[1]) === true;
           } else {
             res = args[0] === args[1];
           }
-          testVal = this.cond === "isnt";
+          testVal = conf.vars[0] === "isnt";
           if (res === testVal) {
-            throw Error(schema[0].argument + " is|not equal to " + schema[1].argument);
+            throw Error(schema[0].source + " is|not equal to " + schema[1].source);
           }
         }
       }
@@ -57,18 +70,18 @@ prolific = (function() {
       math: {
         reg: /\(([0-9-+./\*\(\)]+)\)/,
         get: "$1",
-        act: function(what) {
-          eval("var v = " + what);
+        act: function(conf) {
+          eval("var v = " + conf.subjects[0]);
           return v;
         }
       },
       "var": {
         reg: /(var )()/,
         get: "$2",
-        act: function(what) {
+        act: function(conf) {
           var e;
           try {
-            eval("var v = " + what);
+            eval("var v = " + conf.subjects[0]);
           } catch (_error) {
             e = _error;
             if (e.message.indexOf("undefined" > -1)) {
@@ -84,17 +97,17 @@ prolific = (function() {
       reserved: {
         reg: /(null|undefined|false|true)/,
         get: "$1",
-        act: function(what) {
-          if (what === "undefined") {
+        act: function(conf) {
+          if (conf.subjects[0] === "undefined") {
             return void 0;
           }
-          if (what === "null") {
+          if (conf.subjects[0] === "null") {
             return null;
           }
-          if (what === "false") {
+          if (conf.subjects[0] === "false") {
             return false;
           }
-          if (what === "true") {
+          if (conf.subjects[0] === "true") {
             return true;
           }
         }
@@ -102,77 +115,77 @@ prolific = (function() {
       string: {
         reg: /^'(.+)'/,
         get: "$1",
-        act: function(w) {
-          return w;
+        act: function(conf) {
+          return conf.subjects[0];
         }
       },
       number: {
         reg: /^([0-9.]+)$/,
         get: "$1",
-        act: function(w) {
-          return parseFloat(w, 10);
+        act: function(conf) {
+          return parseFloat(conf.subjects[0], 10);
         }
       },
       jquery: {
         reg: /^\$\(["'](.+)["']\)$/,
         get: "$1",
-        act: function(q) {
-          return $(q);
+        act: function(conf) {
+          return $(conf.subjects[0]);
         }
       },
       generic: {
         reg: "",
         get: "",
-        act: function() {
-          return arguments[0];
+        act: function(conf) {
+          return conf.subjects[0];
         }
+      }
+    };
+    finder = function(where, what, callback) {
+      var a, b, found;
+      for (a in what) {
+        b = what[a];
+        if (!(where.match(new RegExp(b.reg)))) {
+          continue;
+        }
+        found = {
+          source: where,
+          subjects: where.replace(b.reg, b.get).split(","),
+          name: a,
+          item: b
+        };
+        if (b["var"] != null) {
+          found.vars = where.replace(b.reg, b["var"]).split(",");
+        }
+        break;
+      }
+      if (callback != null) {
+        return callback(found);
+      } else {
+        return found;
       }
     };
     get_arguments = function() {
-      var argument, getter, gname, index, _args, _i, _len;
+      var argument, index, _args, _i, _len;
       _args = [];
       for (index = _i = 0, _len = arguments.length; _i < _len; index = ++_i) {
         argument = arguments[index];
-        for (gname in getters) {
-          getter = getters[gname];
-          if (_args.length === index) {
-            if (argument.match(new RegExp(getter.reg))) {
-              _args.push(getter.act.apply(this, argument.replace(getter.reg, getter.get).split(",")));
-              schema.push({
-                getter: gname,
-                value: _args[_args.length - 1],
-                argument: argument
-              });
-            }
+        finder(argument, getters, function(found) {
+          var arg;
+          if (found === void 0) {
+            arg = argument;
+          } else {
+            arg = found.item.act(found);
           }
-        }
-        if (_args.length === index) {
-          _args.push(argument);
-          schema.push({
-            getter: getters.generic,
-            value: argument,
-            argument: argument
-          });
-        }
+          _args.push(arg);
+          return schema[index] = found;
+        });
       }
       return _args;
     };
-    get_matcher = function(assertion) {
-      var matcher, mname;
-      for (mname in matchers) {
-        matcher = matchers[mname];
-        if (!(assertion.match(new RegExp(matcher.reg)))) {
-          continue;
-        }
-        if (matcher["var"] != null) {
-          matcher.cond = assertion.replace(matcher.reg, matcher["var"]);
-        }
-        return matcher;
-      }
-    };
-    run_matcher = function(matcher, assertion) {
-      args = get_arguments.apply(this, assertion.replace(matcher.reg, matcher.get).split(","));
-      return matcher.act();
+    run_matcher = function(matcherObj) {
+      args = get_arguments.apply(this, matcherObj.subjects);
+      return matcherObj.item.act(matcherObj);
     };
     pre_actions = function(assertions) {
       var match;
@@ -184,23 +197,22 @@ prolific = (function() {
       return assertions.split(" and ");
     };
     this.test = function(assertions) {
-      var assertion, matcher, _i, _len, _results,
+      var assertion, matcherObj, _i, _len, _results,
         _this = this;
       assertions = pre_actions(assertions);
       _results = [];
       for (_i = 0, _len = assertions.length; _i < _len; _i++) {
         assertion = assertions[_i];
-        matcher = get_matcher(assertion);
-        console.log("timer", timer);
+        matcherObj = finder(assertion, matchers);
         if (timer !== 0) {
           waits(timer * 1000);
           runs(function() {
-            return run_matcher(matcher, assertion);
+            return run_matcher(matcherObj);
           });
         } else {
-          run_matcher(matcher, assertion);
+          run_matcher(matcherObj);
         }
-        if (matcher === null) {
+        if (matcherObj === null) {
           throw Error("Can't find any test around '" + assertion + "'");
         } else {
           _results.push(void 0);
@@ -209,8 +221,8 @@ prolific = (function() {
       return _results;
     };
     this.getArguments = get_arguments;
-    this.getMatcher = get_matcher;
     this.matchers = matchers;
+    this.finder = finder;
   }
 
   return prolific;
