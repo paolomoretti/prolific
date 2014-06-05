@@ -2,16 +2,25 @@
 class prolific
 
   constructor: ->
-    schema = []
-    args = []
-    timer = 0
-    sentencer:
+    _assertions = null
+    schema      = []
+    args        = []
+    timer       = 0
+
+    sentencer =
+      "timer":
+        reg: /in ([\d.]+) seconds/
+        get: "$1"
+        act: (conf)->
+          timer = parseFloat conf.subjects[0], 10
+          conf.source.replace(conf.source, "").trim()
+
       "and|or":
         reg: /(.+) (and|or) (.+)/
         get: "$1,$3"
         var: "$2"
-        act: ->
-          false
+        act: (conf)->
+          conf.subjects
 
     matchers =
       "is greater|lower than":
@@ -29,15 +38,13 @@ class prolific
         get: "$1"
         var: "$2"
         act: (conf)->
-          throw Error args[0] + " is not an element" if args[0].size() is 0 and conf.vars[0] is "is"
-          throw Error args[0] + " is an element" if args[0].size() > 0 and conf.vars[0] is "isnt"
+          throw Error conf.subjects[0] + " " + (if conf.vars[0] is "is" then "is not" else "is") + " an element" if args[0].size() is 0 and conf.vars[0] is "is"
 
       "is|isnt":
         reg: /(.+) (is|isnt) (?!(greater than|lower than))(.+)/
         get: "$1,$4"
         var: "$2"
         act: (conf)->
-          console.log "schema", schema, conf
           if schema[0].name is "jquery"
             res = args[0].is(args[1]) is true
           else
@@ -61,10 +68,10 @@ class prolific
         act: (conf)->
           try
             eval("var v = "+conf.subjects[0])
+            return v
           catch e
             return undefined if e.message.indexOf "undefined" > -1
             return null if e.message.indexOf "null" > -1
-          v
 
       reserved:
         reg: /(null|undefined|false|true)/
@@ -95,17 +102,21 @@ class prolific
         get: ""
         act: (conf)-> conf.subjects[0]
 
-    finder = (where,what,callback)->
+    ###
+    Arguments: where (string), what (array of matchers objects), callback (optional, function), multiple (boolean)
+    "multiple" argument require a callback
+    ###
+    finder = (where, what, callback, multiple)->
       for a,b of what when where.match new RegExp(b.reg)
         found =
-          source: where
+          source  : where
           subjects: where.replace(b.reg, b.get).split(",")
-          name: a
-          item: b
+          name    : a
+          item    : b
         found.vars = where.replace(b.reg, b.var).split(",") if b.var?
-        break
+        if multiple isnt true then break else callback(found)
 
-      if callback? then callback(found) else return found
+      if callback? and callback isnt false and multiple isnt true then callback(found) else return found
 
     get_arguments = ->
       _args = []
@@ -122,17 +133,31 @@ class prolific
 
       matcherObj.item.act matcherObj
 
-    pre_actions = (assertions)->
-      if assertions.match new RegExp(/in ([\d.]+) seconds/)
-        match = assertions.match(/in ([\d.]+) seconds/)
+    pre_actions = ->
+#      console.log "before preconditions", _assertions
+#      finder _assertions, sentencer, (conf)->
+#        console.log "*pre actions, found somethings", conf
+#
+#        _assertions = conf.item.act conf
+#      , true
+#
+#      console.log "after preconditions", _assertions
+#
+      # Check if a timer is needed
+      if _assertions.match new RegExp(/in ([\d.]+) seconds/)
+        match = _assertions.match(/in ([\d.]+) seconds/)
         timer = parseFloat match[1], 10
-        assertions = assertions.replace(match[0], "").trim()
+        _assertions = _assertions.replace(match[0], "").trim()
 
-      assertions.split(" and ")
+      # Check multiple and sentence
+      _assertions = _assertions.split(" and ")
 
     @test = (assertions)->
-      assertions = pre_actions assertions
-      for assertion in assertions
+      _assertions = assertions
+
+      do pre_actions
+
+      for assertion in _assertions
         matcherObj = finder assertion, matchers
 
         if timer isnt 0
@@ -141,7 +166,7 @@ class prolific
         else
           run_matcher matcherObj
 
-        throw Error "Can't find any test around '"+assertion+"'" if matcherObj is null
+      throw Error "Can't find any test around '"+assertion+"'" if matcherObj is null
 
     @getArguments = get_arguments
     @matchers     = matchers
