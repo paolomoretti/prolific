@@ -23,6 +23,17 @@ class prolific
           conf.subjects
 
     matchers =
+      "method has been called":
+        reg: /^(.+) (has been called)(| with)$/
+        get: "$1"
+        var: "$2,$3"
+        act: (conf)=>
+          if conf.vars[1] is " with"
+            expect(eval conf.subjects[0]).toHaveBeenCalledWith @options
+          else
+            expect(eval conf.subjects[0]).toHaveBeenCalled()
+
+
       "is greater|lower than":
         reg: /(.+) is (greater|lower|>|<) than (.+)/
         get: "$1,$3"
@@ -134,26 +145,25 @@ class prolific
       matcherObj.item.act matcherObj
 
     pre_actions = ->
-#      console.log "before preconditions", _assertions
 #      finder _assertions, sentencer, (conf)->
 #        console.log "*pre actions, found somethings", conf
 #
 #        _assertions = conf.item.act conf
 #      , true
 #
-#      console.log "after preconditions", _assertions
-#
+
       # Check if a timer is needed
       if _assertions.match new RegExp(/in ([\d.]+) seconds/)
         match = _assertions.match(/in ([\d.]+) seconds/)
         timer = parseFloat match[1], 10
         _assertions = _assertions.replace(match[0], "").trim()
 
-      # Check multiple and sentence
+      # Check multiple 'and' sentence
       _assertions = _assertions.split(" and ")
 
-    @test = (assertions)->
-      _assertions = assertions
+    @test = (assumptions, options)->
+      @options = options
+      _assertions = assumptions
 
       do pre_actions
 
@@ -166,12 +176,12 @@ class prolific
         else
           run_matcher matcherObj
 
-      throw Error "Can't find any test around '"+assertion+"'" if matcherObj is null
+      throw Error "Can't find any test" if matcherObj is null
 
     @getArguments = get_arguments
     @matchers     = matchers
     @finder       = finder
 
 # Globalizing prolific
-window.assume = (assertion)->
-  new prolific().test assertion
+assume = (assumptions, options)->
+  new prolific().test assumptions, options

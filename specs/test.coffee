@@ -141,6 +141,7 @@ describe "Prolific", ->
         expect(found.vars[0]).toBe "is"
 
 
+
   describe "assume", ->
 
     it "should expose a window.assume method", ->
@@ -190,6 +191,9 @@ describe "Prolific", ->
       $("body").append $('<div class="ciccio-pasticcio"></div>')
 
       assume "$('.ciccio-pasticcio') is an element"
+      assume "$('.ciccio-pasticcio') is .ciccio-pasticcio"
+      assume "$('.ciccio-pasticcio') is :not(.asdad)"
+      assume "$('.ciccio-pasticcio') isnt .casdiccio-pasticcio"
 
     it "should be able to test 'is greater|lower|>|<' assumptions", ->
       assume "4 is greater than 3"
@@ -220,3 +224,17 @@ describe "Prolific", ->
       , 600
 
       assume "var a is 2 in 1 seconds"
+
+    it "should be able to catch called method", ->
+
+      window.foo =
+        bar: ->
+          alert "test"
+
+      spyOn window.foo, "bar"
+
+      window.foo.bar("test string")
+
+      assume "window.foo.bar has been called"
+      assume "window.foo.bar has been called with", "test string"
+

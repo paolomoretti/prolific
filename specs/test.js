@@ -174,7 +174,10 @@ describe("Prolific", function() {
     it("should be able to test 'is|isnt an element' assumptions", function() {
       assume("$('.ciccio-pasticcio') isnt an element");
       $("body").append($('<div class="ciccio-pasticcio"></div>'));
-      return assume("$('.ciccio-pasticcio') is an element");
+      assume("$('.ciccio-pasticcio') is an element");
+      assume("$('.ciccio-pasticcio') is .ciccio-pasticcio");
+      assume("$('.ciccio-pasticcio') is :not(.asdad)");
+      return assume("$('.ciccio-pasticcio') isnt .casdiccio-pasticcio");
     });
     it("should be able to test 'is greater|lower|>|<' assumptions", function() {
       assume("4 is greater than 3");
@@ -189,7 +192,7 @@ describe("Prolific", function() {
       assume("5 is greater than 4 and 'pippo' isnt 'pluto'");
       return assume("var a is 5 and $('.ciccio-pasticcio') is an element");
     });
-    return it("should wait given seconds before run the test", function() {
+    it("should wait given seconds before run the test", function() {
       window.a = 0;
       setTimeout(function() {
         return window.a = 1;
@@ -199,6 +202,17 @@ describe("Prolific", function() {
         return window.a = 2;
       }, 600);
       return assume("var a is 2 in 1 seconds");
+    });
+    return it("should be able to catch called method", function() {
+      window.foo = {
+        bar: function() {
+          return alert("test");
+        }
+      };
+      spyOn(window.foo, "bar");
+      window.foo.bar("test string");
+      assume("window.foo.bar has been called");
+      return assume("window.foo.bar has been called with", "test string");
     });
   });
 });
