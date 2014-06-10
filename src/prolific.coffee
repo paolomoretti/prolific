@@ -142,7 +142,7 @@ class prolific
     run_matcher = (matcherObj)->
       args = get_arguments.apply @, matcherObj.subjects
 
-      matcherObj.item.act matcherObj
+      matcherObj.item.act.call @, matcherObj
 
     pre_actions = ->
 #      finder _assertions, sentencer, (conf)->
@@ -162,6 +162,7 @@ class prolific
       _assertions = _assertions.split(" and ")
 
     @test = (assumptions, options)->
+      console.log "TEST", @
       @options = options
       _assertions = assumptions
 
@@ -172,9 +173,9 @@ class prolific
 
         if timer isnt 0
           waits timer*1000
-          runs => run_matcher matcherObj
+          runs => run_matcher.call @, matcherObj
         else
-          run_matcher matcherObj
+          run_matcher.call @, matcherObj
 
       throw Error "Can't find any test" if matcherObj is null
 
@@ -183,5 +184,14 @@ class prolific
     @finder       = finder
 
 # Globalizing prolific
-assume = (assumptions, options)->
-  new prolific().test assumptions, options
+assume = false
+#assume = (assumptions, options)->
+#  new prolific().test assumptions, options
+
+beforeEach ->
+#  console.log "@", @
+  assume = (assumptions, options)=>
+    new prolific().test.call @, assumptions, options
+
+
+#  console.log @, assume

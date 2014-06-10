@@ -1,6 +1,9 @@
 instance = new prolific
 
 # Tests
+
+testme = testnull = testfalse = null
+
 describe "Prolific", ->
 
   it "should be a function", ->
@@ -144,8 +147,8 @@ describe "Prolific", ->
 
   describe "assume", ->
 
-    it "should expose a window.assume method", ->
-      expect(window.assume).toBeDefined()
+    it "should expose an assume method", ->
+      expect(assume).toBeDefined()
 
 
     it "should be able to test 'is|isnt' assumptions", ->
@@ -164,20 +167,21 @@ describe "Prolific", ->
       assume "var pippo isnt null"
       assume "var pippo isnt false"
 
-      window.testme = "ciao"
-      assume "var window.testme isnt undefined"
-      assume "var window.testme isnt null"
+      testme = "ciao"
 
-      window.testnull = null
-      assume "var window.testnull isnt undefined"
-      assume "var window.testnull is null"
+      assume "var testme isnt undefined"
+      assume "var testme isnt null"
 
-      window.testfalse = false
-      assume "var window.testfalse isnt 0"
-      assume "var window.testfalse is false"
-      assume "var window.testfalse isnt true"
-      assume "var window.testfalse isnt undefined"
-      assume "var window.testfalse isnt null"
+      testnull = null
+      assume "var testnull isnt undefined"
+      assume "var testnull is null"
+
+      testfalse = false
+      assume "var testfalse isnt 0"
+      assume "var testfalse is false"
+      assume "var testfalse isnt true"
+      assume "var testfalse isnt undefined"
+      assume "var testfalse isnt null"
 
       $("body").append $('<div class="test" id="test"></div>')
 
@@ -237,4 +241,3 @@ describe "Prolific", ->
 
       assume "window.foo.bar has been called"
       assume "window.foo.bar has been called with", "test string"
-

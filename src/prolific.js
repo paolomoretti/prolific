@@ -210,7 +210,7 @@ prolific = (function() {
     };
     run_matcher = function(matcherObj) {
       args = get_arguments.apply(this, matcherObj.subjects);
-      return matcherObj.item.act(matcherObj);
+      return matcherObj.item.act.call(this, matcherObj);
     };
     pre_actions = function() {
       var match;
@@ -224,6 +224,7 @@ prolific = (function() {
     this.test = function(assumptions, options) {
       var assertion, matcherObj, _i, _len,
         _this = this;
+      console.log("TEST", this);
       this.options = options;
       _assertions = assumptions;
       pre_actions();
@@ -233,10 +234,10 @@ prolific = (function() {
         if (timer !== 0) {
           waits(timer * 1000);
           runs(function() {
-            return run_matcher(matcherObj);
+            return run_matcher.call(_this, matcherObj);
           });
         } else {
-          run_matcher(matcherObj);
+          run_matcher.call(this, matcherObj);
         }
       }
       if (matcherObj === null) {
@@ -252,6 +253,11 @@ prolific = (function() {
 
 })();
 
-assume = function(assumptions, options) {
-  return new prolific().test(assumptions, options);
-};
+assume = false;
+
+beforeEach(function() {
+  var _this = this;
+  return assume = function(assumptions, options) {
+    return new prolific().test.call(_this, assumptions, options);
+  };
+});
