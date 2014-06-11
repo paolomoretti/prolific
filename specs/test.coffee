@@ -2,7 +2,7 @@ instance = new prolific
 
 # Tests
 
-testme = testnull = testfalse = null
+testme = testnull = testfalse = foo = null
 
 describe "Prolific", ->
 
@@ -14,7 +14,6 @@ describe "Prolific", ->
     it "should be instantiated", ->
       expect(instance).toBeDefined()
       expect(typeof instance).toBe "object"
-      console.log "instance", instance
 
     it "should have a test method", ->
       expect(instance.test).toBeDefined()
@@ -188,6 +187,7 @@ describe "Prolific", ->
       assume "$('.test') is .test"
       assume "$('.test') is $('.test')"
       assume "$('.test') is #test"
+      assume "var $('.test').size() is 1"
 
     it "should be able to test 'is|isnt an element' assumptions", ->
       assume "$('.ciccio-pasticcio') isnt an element"
@@ -231,13 +231,12 @@ describe "Prolific", ->
 
     it "should be able to catch called method", ->
 
-      window.foo =
+      foo =
         bar: ->
           alert "test"
 
-      spyOn window.foo, "bar"
+      assume "method foo.bar is called", ->
+        foo.bar("test string")
 
-      window.foo.bar("test string")
-
-      assume "window.foo.bar has been called"
-      assume "window.foo.bar has been called with", "test string"
+#      assume "window.foo.bar has been called"
+#      assume "window.foo.bar has been called with", "test string"

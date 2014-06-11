@@ -24,14 +24,22 @@ class prolific
 
     matchers =
       "method has been called":
-        reg: /^(.+) (has been called)(| with)$/
+        reg: /^method (.+) (is called)(| with)$/
         get: "$1"
         var: "$2,$3"
-        act: (conf)=>
-          if conf.vars[1] is " with"
-            expect(eval conf.subjects[0]).toHaveBeenCalledWith @options
-          else
-            expect(eval conf.subjects[0]).toHaveBeenCalled()
+        act: (conf)->
+          _t = conf.subjects[0].split(".")
+          _m = _t.pop()
+          eval("var _o = "+_t.join("."))
+          spyOn _o, _m
+          @options.call @
+
+          expect(eval conf.subjects[0]).toHaveBeenCalled()
+
+#          if conf.vars[1] is " with"
+#            expect(eval conf.subjects[0]).toHaveBeenCalledWith @options
+#          else
+#            expect(eval conf.subjects[0]).toHaveBeenCalled()
 
 
       "is greater|lower than":
@@ -52,7 +60,7 @@ class prolific
           throw Error conf.subjects[0] + " " + (if conf.vars[0] is "is" then "is not" else "is") + " an element" if args[0].size() is 0 and conf.vars[0] is "is"
 
       "is|isnt":
-        reg: /(.+) (is|isnt) (?!(greater than|lower than))(.+)/
+        reg: /(.+) (is|isnt) (?!(greater than|lower than|called))(.+)/
         get: "$1,$4"
         var: "$2"
         act: (conf)->
@@ -162,7 +170,6 @@ class prolific
       _assertions = _assertions.split(" and ")
 
     @test = (assumptions, options)->
-      console.log "TEST", @
       @options = options
       _assertions = assumptions
 
@@ -183,15 +190,7 @@ class prolific
     @matchers     = matchers
     @finder       = finder
 
-# Globalizing prolific
-assume = false
-#assume = (assumptions, options)->
-#  new prolific().test assumptions, options
 
 beforeEach ->
-#  console.log "@", @
-  assume = (assumptions, options)=>
+  window.assume = (assumptions, options)=>
     new prolific().test.call @, assumptions, options
-
-
-#  console.log @, assume
