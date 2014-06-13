@@ -28,24 +28,17 @@ class prolific
         get: "$1"
         var: "$2,$3,$4"
         act: (conf)->
-#          console.log "----", conf.vars
-
           _t = conf.subjects[0].split(".")
           _m = _t.pop()
           eval("var _o = "+_t.join("."))
           spyOn _o, _m
+          throw Error "You must pass a function to execute to test if a method is called" if not @options
           @options.call @
 
           if conf.vars[1] is ""
             expect(eval conf.subjects[0]).toHaveBeenCalled()
           else
             expect(eval conf.subjects[0]).toHaveBeenCalledWith eval(conf.vars[2])
-
-#          if conf.vars[1] is " with"
-#            expect(eval conf.subjects[0]).toHaveBeenCalledWith @options
-#          else
-#            expect(eval conf.subjects[0]).toHaveBeenCalled()
-
 
       "is greater|lower than":
         reg: /(.+) is (greater|lower|>|<) than (.+)/
@@ -63,6 +56,18 @@ class prolific
         var: "$2"
         act: (conf)->
           throw Error conf.subjects[0] + " " + (if conf.vars[0] is "is" then "is not" else "is") + " an element" if args[0].size() is 0 and conf.vars[0] is "is"
+
+      "on event":
+        reg: /^on (.+) (.+) then (.+)$/
+        get: "$3"
+        var: "$1,$2"
+        act: (conf)->
+          if conf.subjects[0].indexOf("method") is 0
+            new prolific().test conf.subjects[0], ->
+              $(conf.vars[1]).trigger(conf.vars[0])
+          else
+            $(conf.vars[1]).trigger(conf.vars[0])
+            new prolific().test conf.subjects[0], @options
 
       "is|isnt":
         reg: /(.+) (is|isnt) (?!(greater than|lower than|called))(.+)/
@@ -166,7 +171,7 @@ class prolific
 #
 
       # Check if a timer is needed
-      if _assertions.match new RegExp(/in ([\d.]+) seconds/)
+      if _assertions.match new RegExp(/^in ([\d.]+) seconds/)
         match = _assertions.match(/in ([\d.]+) seconds/)
         timer = parseFloat match[1], 10
         _assertions = _assertions.replace(match[0], "").trim()
@@ -175,6 +180,7 @@ class prolific
       _assertions = _assertions.split(" and ")
 
     @test = (assumptions, options)->
+      console.log "test", assumptions
       @options = options
       _assertions = assumptions
 

@@ -116,6 +116,15 @@ describe "in {x} seconds", ->
         assume "in 2 seconds var a is 1"
         
         
+describe "on events", ->
+
+    it "should trigger a given event and then do the test", ->
+        $("body").append $("<div id='testEvent'></div>").on "click", ->
+          window.b = "clicked"
+  
+        assume "on click #testEvent then var b is 'clicked'"
+        
+        
 describe "more assumptions", ->
 
     it "should check more than 1 assumption with 'and'", ->

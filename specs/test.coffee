@@ -2,7 +2,7 @@ instance = new prolific
 
 # Tests
 
-testme = testnull = testfalse = foo = null
+testme = testnull = testfalse = foo = a = null
 
 describe "Prolific", ->
 
@@ -216,18 +216,12 @@ describe "Prolific", ->
 
     it "should wait given seconds before run the test", ->
 
-      window.a = 0
+      a = 0
       setTimeout ->
-        window.a = 1
+        a = 1
       , 500
 
       assume "in .51 seconds var a is 1"
-
-      setTimeout ->
-        window.a = 2
-      , 600
-
-      assume "var a is 2 in 1 seconds"
 
     it "should be able to catch called method", ->
 
@@ -242,3 +236,21 @@ describe "Prolific", ->
 
       assume "method foo.bar is called with 'test string'", ->
         foo.bar "test string"
+
+    it "should trigger an event and then test", ->
+      t = $("<div id='testEvent'></div>").on "click", ->
+        window.b = "clicked"
+        console.log "test"
+
+      $("body").append t
+
+      assume "on click #testEvent then var b is 'clicked'"
+      assume "on click #testEvent then method console.log is called with 'test'"
+
+    it "should trigger an event and wait before check", ->
+      $("body").append $("<div id='testEventDelayed'></div>").on "click", =>
+        setTimeout ->
+          window.c = "clicked delayed"
+        , 1000
+
+      assume "on click #testEventDelayed then in 1 seconds var c is 'clicked delayed'"

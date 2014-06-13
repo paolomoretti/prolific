@@ -37,6 +37,9 @@ prolific = (function() {
           _m = _t.pop();
           eval("var _o = " + _t.join("."));
           spyOn(_o, _m);
+          if (!this.options) {
+            throw Error("You must pass a function to execute to test if a method is called");
+          }
           this.options.call(this);
           if (conf.vars[1] === "") {
             return expect(eval(conf.subjects[0])).toHaveBeenCalled();
@@ -66,6 +69,21 @@ prolific = (function() {
         act: function(conf) {
           if (args[0].size() === 0 && conf.vars[0] === "is") {
             throw Error(conf.subjects[0] + " " + (conf.vars[0] === "is" ? "is not" : "is") + " an element");
+          }
+        }
+      },
+      "on event": {
+        reg: /^on (.+) (.+) then (.+)$/,
+        get: "$3",
+        "var": "$1,$2",
+        act: function(conf) {
+          if (conf.subjects[0].indexOf("method") === 0) {
+            return new prolific().test(conf.subjects[0], function() {
+              return $(conf.vars[1]).trigger(conf.vars[0]);
+            });
+          } else {
+            $(conf.vars[1]).trigger(conf.vars[0]);
+            return new prolific().test(conf.subjects[0], this.options);
           }
         }
       },
@@ -219,7 +237,7 @@ prolific = (function() {
     };
     pre_actions = function() {
       var match;
-      if (_assertions.match(new RegExp(/in ([\d.]+) seconds/))) {
+      if (_assertions.match(new RegExp(/^in ([\d.]+) seconds/))) {
         match = _assertions.match(/in ([\d.]+) seconds/);
         timer = parseFloat(match[1], 10);
         _assertions = _assertions.replace(match[0], "").trim();
@@ -229,6 +247,7 @@ prolific = (function() {
     this.test = function(assumptions, options) {
       var assertion, matcherObj, _i, _len,
         _this = this;
+      console.log("test", assumptions);
       this.options = options;
       _assertions = assumptions;
       pre_actions();
