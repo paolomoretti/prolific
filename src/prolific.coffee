@@ -54,15 +54,13 @@ class prolific
         reg: /(.+) (is|isnt) an (element)$/
         get: "$1"
         var: "$2"
-        act: (conf)->
-          throw Error conf.subjects[0] + " " + (if conf.vars[0] is "is" then "is not" else "is") + " an element" if args[0].size() is 0 and conf.vars[0] is "is"
+        act: (conf)-> prolific.fail conf if args[0].size() is 0 and conf.vars[0] is "is"
 
       "on event":
         reg: /^on ([a-z]+) (.+) then (.+)$/
         get: "$3"
         var: "$1,$2"
         act: (conf)->
-          console.log "on event", conf
           if conf.subjects[0].indexOf("method") is 0
             new prolific().test conf.subjects[0], ->
               $(conf.vars[1]).trigger(conf.vars[0])
@@ -156,14 +154,11 @@ class prolific
           _args.push arg
           schema[index] = found
 
-      return _args
+      _args
 
     run_matcher = (matcherObj)->
-      try
-        args = get_arguments.apply @, matcherObj.subjects
-        matcherObj.item.act.call @, matcherObj
-      catch
-        throw Error "Can't find a proper assumption", matcherObj
+      args = get_arguments.apply @, matcherObj.subjects
+      matcherObj.item.act.call @, matcherObj
 
     pre_actions = ->
       finder _assertions, sentencer, (conf)=>
@@ -181,7 +176,7 @@ class prolific
       for assertion in _assertions
         matcherObj = finder assertion, matchers
 
-        waits timer*1000
+        waits timer*1000 if timer > 0
         runs => run_matcher.call @, matcherObj
 
       throw Error "Can't find any test" if matcherObj is null
@@ -190,6 +185,12 @@ class prolific
     @matchers     = matchers
     @finder       = finder
 
+
+  @fail = (err, params)->
+    errstr = "Expetation '"+err.source+"' is not met"
+    errstr += "("+params+")" if params?
+
+    throw Error errstr
 
 beforeEach ->
   window.assume = (assumptions, options)=>

@@ -69,7 +69,7 @@ prolific = (function() {
         "var": "$2",
         act: function(conf) {
           if (args[0].size() === 0 && conf.vars[0] === "is") {
-            throw Error(conf.subjects[0] + " " + (conf.vars[0] === "is" ? "is not" : "is") + " an element");
+            return prolific.fail(conf);
           }
         }
       },
@@ -78,7 +78,6 @@ prolific = (function() {
         get: "$3",
         "var": "$1,$2",
         act: function(conf) {
-          console.log("on event", conf);
           if (conf.subjects[0].indexOf("method") === 0) {
             return new prolific().test(conf.subjects[0], function() {
               return $(conf.vars[1]).trigger(conf.vars[0]);
@@ -234,12 +233,8 @@ prolific = (function() {
       return _args;
     };
     run_matcher = function(matcherObj) {
-      try {
-        args = get_arguments.apply(this, matcherObj.subjects);
-        return matcherObj.item.act.call(this, matcherObj);
-      } catch (_error) {
-        throw Error("Can't find a proper assumption", matcherObj);
-      }
+      args = get_arguments.apply(this, matcherObj.subjects);
+      return matcherObj.item.act.call(this, matcherObj);
     };
     pre_actions = function() {
       var _this = this;
@@ -259,7 +254,9 @@ prolific = (function() {
       for (_i = 0, _len = _assertions.length; _i < _len; _i++) {
         assertion = _assertions[_i];
         matcherObj = finder(assertion, matchers);
-        waits(timer * 1000);
+        if (timer > 0) {
+          waits(timer * 1000);
+        }
         runs(function() {
           return run_matcher.call(_this, matcherObj);
         });
@@ -272,6 +269,15 @@ prolific = (function() {
     this.matchers = matchers;
     this.finder = finder;
   }
+
+  prolific.fail = function(err, params) {
+    var errstr;
+    errstr = "Expetation '" + err.source + "' is not met";
+    if (params != null) {
+      errstr += "(" + params + ")";
+    }
+    throw Error(errstr);
+  };
 
   return prolific;
 
