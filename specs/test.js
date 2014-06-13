@@ -14,13 +14,9 @@ describe("Prolific", function() {
       expect(instance).toBeDefined();
       return expect(typeof instance).toBe("object");
     });
-    it("should have a test method", function() {
+    return it("should have a test method", function() {
       expect(instance.test).toBeDefined();
       return expect(typeof instance.test).toBe("function");
-    });
-    return it("shoould not expose internal methods", function() {
-      expect(instance.run_matcher).not.toBeDefined();
-      return expect(instance.get_arguments).not.toBeDefined();
     });
   });
   describe("get attributes", function() {
