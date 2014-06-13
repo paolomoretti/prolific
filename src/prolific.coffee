@@ -24,17 +24,22 @@ class prolific
 
     matchers =
       "method has been called":
-        reg: /^method (.+) (is called)(| with)$/
+        reg: /^method (.+) (is called)( with |)(.+|)$/
         get: "$1"
-        var: "$2,$3"
+        var: "$2,$3,$4"
         act: (conf)->
+#          console.log "----", conf.vars
+
           _t = conf.subjects[0].split(".")
           _m = _t.pop()
           eval("var _o = "+_t.join("."))
           spyOn _o, _m
           @options.call @
 
-          expect(eval conf.subjects[0]).toHaveBeenCalled()
+          if conf.vars[1] is ""
+            expect(eval conf.subjects[0]).toHaveBeenCalled()
+          else
+            expect(eval conf.subjects[0]).toHaveBeenCalledWith eval(conf.vars[2])
 
 #          if conf.vars[1] is " with"
 #            expect(eval conf.subjects[0]).toHaveBeenCalledWith @options

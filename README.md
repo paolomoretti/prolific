@@ -93,6 +93,14 @@ describe "method has been called", ->
         assume "method testobj.testmethod is called", ->
             testobj.testmethod()
             
+    it "should spy and check if a method is called with argument", ->
+        testobj = 
+            testmethod: ->
+                alert "test"
+                
+        assume "method testobj.testmethod is called with 'test string'", ->
+            testobj.testmethod 'test string'
+            
             
 describe "in {x} seconds", ->
 

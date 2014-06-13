@@ -205,13 +205,18 @@ describe("Prolific", function() {
       }, 600);
       return assume("var a is 2 in 1 seconds");
     });
-    return it("should be able to catch called method", function() {
+    it("should be able to catch called method", function() {
       foo = {
         bar: function() {
           return alert("test");
         }
       };
       return assume("method foo.bar is called", function() {
+        return foo.bar("test string");
+      });
+    });
+    return it("should be able to test argument of a called method", function() {
+      return assume("method foo.bar is called with 'test string'", function() {
         return foo.bar("test string");
       });
     });

@@ -238,5 +238,7 @@ describe "Prolific", ->
       assume "method foo.bar is called", ->
         foo.bar("test string")
 
-#      assume "window.foo.bar has been called"
-#      assume "window.foo.bar has been called with", "test string"
+    it "should be able to test argument of a called method", ->
+
+      assume "method foo.bar is called with 'test string'", ->
+        foo.bar "test string"

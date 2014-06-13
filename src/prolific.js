@@ -28,9 +28,9 @@ prolific = (function() {
     };
     matchers = {
       "method has been called": {
-        reg: /^method (.+) (is called)(| with)$/,
+        reg: /^method (.+) (is called)( with |)(.+|)$/,
         get: "$1",
-        "var": "$2,$3",
+        "var": "$2,$3,$4",
         act: function(conf) {
           var _m, _t;
           _t = conf.subjects[0].split(".");
@@ -38,7 +38,11 @@ prolific = (function() {
           eval("var _o = " + _t.join("."));
           spyOn(_o, _m);
           this.options.call(this);
-          return expect(eval(conf.subjects[0])).toHaveBeenCalled();
+          if (conf.vars[1] === "") {
+            return expect(eval(conf.subjects[0])).toHaveBeenCalled();
+          } else {
+            return expect(eval(conf.subjects[0])).toHaveBeenCalledWith(eval(conf.vars[2]));
+          }
         }
       },
       "is greater|lower than": {
