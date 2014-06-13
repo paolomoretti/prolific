@@ -19,8 +19,7 @@ class prolific
         reg: /(.+) (and|or) (.+)/
         get: "$1,$3"
         var: "$2"
-        act: (conf)=>
-          _assertions = _assertions.split(" and ")
+        act: (conf)=> _assertions = _assertions.split(" and ")
 
     matchers =
       "method has been called":
@@ -32,7 +31,8 @@ class prolific
           _m = _t.pop()
           eval("var _o = "+_t.join("."))
           spyOn _o, _m
-          throw Error "You must pass a function to execute to test if a method is called" if not @options
+
+          throw Error "You must pass a function to execute to test if a method is called" unless @options?
           @options.call @
 
           if conf.vars[1] is ""
@@ -44,17 +44,22 @@ class prolific
         reg: /(.+) is (greater|lower|>|<) than (.+)/
         get: "$1,$3"
         var: "$2"
+        err: (conf)->
+          args[0] + " is "+(if conf.vars[0] in ["greater", ">"] then "lower" else "greater" )+" than " + args[1]
         act: (conf)->
+          prolific.fail conf, num + " is not a number" for num in args when isNaN(num)
+
           if conf.vars[0] in ["greater", ">"] and (args[0] <= args[1] or `args[0] > args[1] == false`)
-            throw Error arguments[0] + " ("+args[0]+") is not greater than " + arguments[1] + " ("+args[1 ]+")"
-          if @cond in ["lower", "<"] and (args[0] >= args[1] or `args[0] < args[1] == false`)
-            throw Error arguments[0] + " ("+args[0]+") is not lower than " + arguments[1] + " ("+args[1 ]+")"
+            prolific.fail conf
+          if conf.vars[0] in ["lower", "<"] and (args[0] >= args[1] or `args[0] < args[1] == false`)
+            prolific.fail conf
 
       "is|isnt an element":
         reg: /(.+) (is|isnt) an (element)$/
         get: "$1"
         var: "$2"
-        act: (conf)-> prolific.fail conf if args[0].size() is 0 and conf.vars[0] is "is"
+        act: (conf)->
+          prolific.fail conf if args[0].size() is 0 and conf.vars[0] is "is"
 
       "on event":
         reg: /^on ([a-z]+) (.+) then (.+)$/
@@ -72,15 +77,13 @@ class prolific
         reg: /(.+) (is|isnt) (?!(greater than|lower than|called))(.+)/
         get: "$1,$4"
         var: "$2"
+        err: (conf)->
+          args[0]+(if conf.vars[0] is "is" then " isnt " else " is ")+args[1]
         act: (conf)->
-          if schema[0].name is "jquery"
-            res = args[0].is(args[1]) is true
-          else
-            res = args[0] is args[1]
-
+          res = if schema[0].name is "jquery" then args[0].is(args[1]) is true else args[0] is args[1]
           testVal = conf.vars[0] is "isnt"
 
-          throw Error schema[0].source + " is|not equal to " + schema[1].source if res is testVal
+          prolific.fail conf if res is testVal
 
     getters =
       math:
@@ -118,7 +121,8 @@ class prolific
       number:
         reg: /^([0-9.]+)$/
         get: "$1"
-        act: (conf)-> return parseFloat(conf.subjects[0], 10)
+        act: (conf)->
+          return parseFloat(conf.subjects[0], 10)
 
       jquery:
         reg: /^\$\(["'](.+)["']\)$/
@@ -188,7 +192,8 @@ class prolific
 
   @fail = (err, params)->
     errstr = "Expetation '"+err.source+"' is not met"
-    errstr += "("+params+")" if params?
+    errstr += " ("+params+")" if params?
+    errstr += " ("+err.item.err(err)+")" if err.item.err?
 
     throw Error errstr
 

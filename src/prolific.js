@@ -38,7 +38,7 @@ prolific = (function() {
           _m = _t.pop();
           eval("var _o = " + _t.join("."));
           spyOn(_o, _m);
-          if (!this.options) {
+          if (this.options == null) {
             throw Error("You must pass a function to execute to test if a method is called");
           }
           this.options.call(this);
@@ -53,13 +53,23 @@ prolific = (function() {
         reg: /(.+) is (greater|lower|>|<) than (.+)/,
         get: "$1,$3",
         "var": "$2",
+        err: function(conf) {
+          var _ref;
+          return args[0] + " is " + ((_ref = conf.vars[0]) === "greater" || _ref === ">" ? "lower" : "greater") + " than " + args[1];
+        },
         act: function(conf) {
-          var _ref, _ref1;
-          if (((_ref = conf.vars[0]) === "greater" || _ref === ">") && (args[0] <= args[1] || args[0] > args[1] == false)) {
-            throw Error(arguments[0] + " (" + args[0] + ") is not greater than " + arguments[1] + " (" + args[1] + ")");
+          var num, _i, _len, _ref, _ref1;
+          for (_i = 0, _len = args.length; _i < _len; _i++) {
+            num = args[_i];
+            if (isNaN(num)) {
+              prolific.fail(conf, num + " is not a number");
+            }
           }
-          if (((_ref1 = this.cond) === "lower" || _ref1 === "<") && (args[0] >= args[1] || args[0] < args[1] == false)) {
-            throw Error(arguments[0] + " (" + args[0] + ") is not lower than " + arguments[1] + " (" + args[1] + ")");
+          if (((_ref = conf.vars[0]) === "greater" || _ref === ">") && (args[0] <= args[1] || args[0] > args[1] == false)) {
+            prolific.fail(conf);
+          }
+          if (((_ref1 = conf.vars[0]) === "lower" || _ref1 === "<") && (args[0] >= args[1] || args[0] < args[1] == false)) {
+            return prolific.fail(conf);
           }
         }
       },
@@ -92,16 +102,15 @@ prolific = (function() {
         reg: /(.+) (is|isnt) (?!(greater than|lower than|called))(.+)/,
         get: "$1,$4",
         "var": "$2",
+        err: function(conf) {
+          return args[0] + (conf.vars[0] === "is" ? " isnt " : " is ") + args[1];
+        },
         act: function(conf) {
           var res, testVal;
-          if (schema[0].name === "jquery") {
-            res = args[0].is(args[1]) === true;
-          } else {
-            res = args[0] === args[1];
-          }
+          res = schema[0].name === "jquery" ? args[0].is(args[1]) === true : args[0] === args[1];
           testVal = conf.vars[0] === "isnt";
           if (res === testVal) {
-            throw Error(schema[0].source + " is|not equal to " + schema[1].source);
+            return prolific.fail(conf);
           }
         }
       }
@@ -274,7 +283,10 @@ prolific = (function() {
     var errstr;
     errstr = "Expetation '" + err.source + "' is not met";
     if (params != null) {
-      errstr += "(" + params + ")";
+      errstr += " (" + params + ")";
+    }
+    if (err.item.err != null) {
+      errstr += " (" + err.item.err(err) + ")";
     }
     throw Error(errstr);
   };
