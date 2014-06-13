@@ -5,7 +5,7 @@
 
 Prolific is a library meant to be used along with Jasmine 1.3.
 
-It requires **jquery** to process element on the page and it accepts jquery expressions for comparison.
+It requires **jquery** to process elements and it accepts jquery expressions for comparison.
 
 ### Pros:
 1. More readable test suites
