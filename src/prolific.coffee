@@ -9,18 +9,18 @@ class prolific
 
     sentencer =
       "timer":
-        reg: /in ([\d.]+) seconds/
-        get: "$1"
-        act: (conf)->
+        reg: /^in ([\d.]+) seconds (.+)$/
+        get: "$1,$2"
+        act: (conf)=>
           timer = parseFloat conf.subjects[0], 10
-          conf.source.replace(conf.source, "").trim()
+          _assertions = conf.subjects[1]
 
       "and|or":
         reg: /(.+) (and|or) (.+)/
         get: "$1,$3"
         var: "$2"
-        act: (conf)->
-          conf.subjects
+        act: (conf)=>
+          _assertions = _assertions.split(" and ")
 
     matchers =
       "method has been called":
@@ -58,10 +58,11 @@ class prolific
           throw Error conf.subjects[0] + " " + (if conf.vars[0] is "is" then "is not" else "is") + " an element" if args[0].size() is 0 and conf.vars[0] is "is"
 
       "on event":
-        reg: /^on (.+) (.+) then (.+)$/
+        reg: /^on ([a-z]+) (.+) then (.+)$/
         get: "$3"
         var: "$1,$2"
         act: (conf)->
+          console.log "on event", conf
           if conf.subjects[0].indexOf("method") is 0
             new prolific().test conf.subjects[0], ->
               $(conf.vars[1]).trigger(conf.vars[0])
@@ -158,29 +159,20 @@ class prolific
       return _args
 
     run_matcher = (matcherObj)->
-      args = get_arguments.apply @, matcherObj.subjects
-
-      matcherObj.item.act.call @, matcherObj
+      try
+        args = get_arguments.apply @, matcherObj.subjects
+        matcherObj.item.act.call @, matcherObj
+      catch
+        throw Error "Can't find a proper assumption", matcherObj
 
     pre_actions = ->
-#      finder _assertions, sentencer, (conf)->
-#        console.log "*pre actions, found somethings", conf
-#
-#        _assertions = conf.item.act conf
-#      , true
-#
+      finder _assertions, sentencer, (conf)=>
+        _assertions = conf.item.act conf
+      , true
 
-      # Check if a timer is needed
-      if _assertions.match new RegExp(/^in ([\d.]+) seconds/)
-        match = _assertions.match(/in ([\d.]+) seconds/)
-        timer = parseFloat match[1], 10
-        _assertions = _assertions.replace(match[0], "").trim()
-
-      # Check multiple 'and' sentence
-      _assertions = _assertions.split(" and ")
+      _assertions = [_assertions] if typeof _assertions is "string"
 
     @test = (assumptions, options)->
-      console.log "test", assumptions
       @options = options
       _assertions = assumptions
 
@@ -189,11 +181,8 @@ class prolific
       for assertion in _assertions
         matcherObj = finder assertion, matchers
 
-        if timer isnt 0
-          waits timer*1000
-          runs => run_matcher.call @, matcherObj
-        else
-          run_matcher.call @, matcherObj
+        waits timer*1000
+        runs => run_matcher.call @, matcherObj
 
       throw Error "Can't find any test" if matcherObj is null
 
@@ -204,4 +193,4 @@ class prolific
 
 beforeEach ->
   window.assume = (assumptions, options)=>
-    new prolific().test.call @, assumptions, options
+    runs -> new prolific().test.call @, assumptions, options

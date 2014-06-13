@@ -3,18 +3,19 @@ var prolific;
 
 prolific = (function() {
   function prolific() {
-    var args, finder, get_arguments, getters, matchers, pre_actions, run_matcher, schema, sentencer, timer, _assertions;
+    var args, finder, get_arguments, getters, matchers, pre_actions, run_matcher, schema, sentencer, timer, _assertions,
+      _this = this;
     _assertions = null;
     schema = [];
     args = [];
     timer = 0;
     sentencer = {
       "timer": {
-        reg: /in ([\d.]+) seconds/,
-        get: "$1",
+        reg: /^in ([\d.]+) seconds (.+)$/,
+        get: "$1,$2",
         act: function(conf) {
           timer = parseFloat(conf.subjects[0], 10);
-          return conf.source.replace(conf.source, "").trim();
+          return _assertions = conf.subjects[1];
         }
       },
       "and|or": {
@@ -22,7 +23,7 @@ prolific = (function() {
         get: "$1,$3",
         "var": "$2",
         act: function(conf) {
-          return conf.subjects;
+          return _assertions = _assertions.split(" and ");
         }
       }
     };
@@ -73,10 +74,11 @@ prolific = (function() {
         }
       },
       "on event": {
-        reg: /^on (.+) (.+) then (.+)$/,
+        reg: /^on ([a-z]+) (.+) then (.+)$/,
         get: "$3",
         "var": "$1,$2",
         act: function(conf) {
+          console.log("on event", conf);
           if (conf.subjects[0].indexOf("method") === 0) {
             return new prolific().test(conf.subjects[0], function() {
               return $(conf.vars[1]).trigger(conf.vars[0]);
@@ -232,36 +234,35 @@ prolific = (function() {
       return _args;
     };
     run_matcher = function(matcherObj) {
-      args = get_arguments.apply(this, matcherObj.subjects);
-      return matcherObj.item.act.call(this, matcherObj);
+      try {
+        args = get_arguments.apply(this, matcherObj.subjects);
+        return matcherObj.item.act.call(this, matcherObj);
+      } catch (_error) {
+        throw Error("Can't find a proper assumption", matcherObj);
+      }
     };
     pre_actions = function() {
-      var match;
-      if (_assertions.match(new RegExp(/^in ([\d.]+) seconds/))) {
-        match = _assertions.match(/in ([\d.]+) seconds/);
-        timer = parseFloat(match[1], 10);
-        _assertions = _assertions.replace(match[0], "").trim();
+      var _this = this;
+      finder(_assertions, sentencer, function(conf) {
+        return _assertions = conf.item.act(conf);
+      }, true);
+      if (typeof _assertions === "string") {
+        return _assertions = [_assertions];
       }
-      return _assertions = _assertions.split(" and ");
     };
     this.test = function(assumptions, options) {
       var assertion, matcherObj, _i, _len,
         _this = this;
-      console.log("test", assumptions);
       this.options = options;
       _assertions = assumptions;
       pre_actions();
       for (_i = 0, _len = _assertions.length; _i < _len; _i++) {
         assertion = _assertions[_i];
         matcherObj = finder(assertion, matchers);
-        if (timer !== 0) {
-          waits(timer * 1000);
-          runs(function() {
-            return run_matcher.call(_this, matcherObj);
-          });
-        } else {
-          run_matcher.call(this, matcherObj);
-        }
+        waits(timer * 1000);
+        runs(function() {
+          return run_matcher.call(_this, matcherObj);
+        });
       }
       if (matcherObj === null) {
         throw Error("Can't find any test");
@@ -279,6 +280,8 @@ prolific = (function() {
 beforeEach(function() {
   var _this = this;
   return window.assume = function(assumptions, options) {
-    return new prolific().test.call(_this, assumptions, options);
+    return runs(function() {
+      return new prolific().test.call(this, assumptions, options);
+    });
   };
 });
