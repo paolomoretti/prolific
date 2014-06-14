@@ -106,8 +106,8 @@ prolific = (function() {
           return "" + args[0] + " " + (conf.vars[0] === "is" ? "isnt" : "is") + " " + args[1];
         },
         act: function(conf) {
-          var res, testVal;
-          res = schema[0].name === "jquery" ? args[0].is(args[1]) === true : args[0] === args[1];
+          var res, testVal, _ref;
+          res = (_ref = schema[0].name) === "jquery" || _ref === "jqueryshort" ? args[0].is(args[1]) === true : args[0] === args[1];
           testVal = conf.vars[0] === "isnt";
           if (res === testVal) {
             return prolific.fail(conf);
@@ -173,6 +173,13 @@ prolific = (function() {
         get: "$1",
         act: function(conf) {
           return parseFloat(conf.subjects[0], 10);
+        }
+      },
+      jqueryshort: {
+        reg: /^\$ (.+)$/,
+        get: "$1",
+        act: function(conf) {
+          return $(conf.subjects[0]);
         }
       },
       jquery: {

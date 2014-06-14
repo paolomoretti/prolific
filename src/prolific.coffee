@@ -80,7 +80,7 @@ class prolific
         err: (conf)->
           "#{args[0]} #{(if conf.vars[0] is "is" then "isnt" else "is")} #{args[1]}"
         act: (conf)->
-          res = if schema[0].name is "jquery" then args[0].is(args[1]) is true else args[0] is args[1]
+          res = if schema[0].name in ["jquery", "jqueryshort"] then args[0].is(args[1]) is true else args[0] is args[1]
           testVal = conf.vars[0] is "isnt"
 
           prolific.fail conf if res is testVal
@@ -123,6 +123,11 @@ class prolific
         get: "$1"
         act: (conf)->
           parseFloat conf.subjects[0], 10
+
+      jqueryshort:
+        reg: /^\$ (.+)$/
+        get: "$1"
+        act: (conf)-> $(conf.subjects[0])
 
       jquery:
         reg: /^\$\(["'](.+)["']\)$/

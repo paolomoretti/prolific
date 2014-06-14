@@ -130,7 +130,7 @@ describe("Prolific", function() {
     return describe("matcher 'is <query>'", function() {
       return it("should catch '$(query) is .classname' assumption", function() {
         var found;
-        found = instance.finder("$('ciccio-pasticcio') is .ciccio-pasticcio", instance.matchers);
+        found = instance.finder("$ .ciccio-pasticcio is .ciccio-pasticcio", instance.matchers);
         return expect(found.vars[0]).toBe("is");
       });
     });
@@ -167,18 +167,18 @@ describe("Prolific", function() {
       assume("var testfalse isnt undefined");
       assume("var testfalse isnt null");
       $("body").append($('<div class="test" id="test"></div>'));
-      assume("$('.test') is .test");
-      assume("$('.test') is $('.test')");
+      assume("$ .test is .test");
+      assume("$ .test is $ .test");
       assume("$('.test') is #test");
       return assume("var $('.test').size() is 1");
     });
     it("should be able to test 'is|isnt an element' assumptions", function() {
       assume("$('.ciccio-pasticcio') isnt an element");
       $("body").append($('<div class="ciccio-pasticcio"></div>'));
-      assume("$('.ciccio-pasticcio') is an element");
-      assume("$('.ciccio-pasticcio') is .ciccio-pasticcio");
-      assume("$('.ciccio-pasticcio') is :not(.asdad)");
-      return assume("$('.ciccio-pasticcio') isnt .casdiccio-pasticcio");
+      assume("$ .ciccio-pasticcio is an element");
+      assume("$ .ciccio-pasticcio is .ciccio-pasticcio");
+      assume("$ .ciccio-pasticcio is :not(.asdad)");
+      return assume("$ .ciccio-pasticcio isnt .casdiccio-pasticcio");
     });
     it("should be able to test 'is greater|lower|>|<' assumptions", function() {
       assume("4 is greater than 3");
