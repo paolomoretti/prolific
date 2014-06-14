@@ -1,7 +1,7 @@
 # Prolific
 ---
 
-### Make jasmine talk
+### Make jasmine talk ![alt build status](https://drone.io/github.com/paolomoretti/prolific/status.png)
 
 Prolific is a library meant to be used along with Jasmine 1.3.
 
