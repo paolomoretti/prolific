@@ -3,7 +3,7 @@ var prolific;
 
 prolific = (function() {
   function prolific() {
-    var args, finder, get_arguments, getters, matchers, pre_actions, run_matcher, schema, sentencer, timer, _assertions,
+    var args, finder, getArguments, getters, matchers, preActions, runMatcher, schema, sentencer, timer, _assertions,
       _this = this;
     _assertions = null;
     schema = [];
@@ -22,7 +22,7 @@ prolific = (function() {
         reg: /(.+) (and|or) (.+)/,
         get: "$1,$3",
         "var": "$2",
-        act: function(conf) {
+        act: function() {
           return _assertions = _assertions.split(" and ");
         }
       }
@@ -36,7 +36,7 @@ prolific = (function() {
           var _m, _t;
           _t = conf.subjects[0].split(".");
           _m = _t.pop();
-          eval("var _o = " + _t.join("."));
+          eval("var _o = " + (_t.join(".")));
           spyOn(_o, _m);
           if (this.options == null) {
             throw Error("You must pass a function to execute to test if a method is called");
@@ -55,14 +55,14 @@ prolific = (function() {
         "var": "$2",
         err: function(conf) {
           var _ref;
-          return args[0] + " is " + ((_ref = conf.vars[0]) === "greater" || _ref === ">" ? "lower" : "greater") + " than " + args[1];
+          return "" + args[0] + " is " + ((_ref = conf.vars[0]) === "greater" || _ref === ">" ? "lower" : "greater") + " than " + args[1];
         },
         act: function(conf) {
           var num, _i, _len, _ref, _ref1;
           for (_i = 0, _len = args.length; _i < _len; _i++) {
             num = args[_i];
             if (isNaN(num)) {
-              prolific.fail(conf, num + " is not a number");
+              prolific.fail(conf, "" + num + " is not a number");
             }
           }
           if (((_ref = conf.vars[0]) === "greater" || _ref === ">") && (args[0] <= args[1] || args[0] > args[1] == false)) {
@@ -103,7 +103,7 @@ prolific = (function() {
         get: "$1,$4",
         "var": "$2",
         err: function(conf) {
-          return args[0] + (conf.vars[0] === "is" ? " isnt " : " is ") + args[1];
+          return "" + args[0] + " " + (conf.vars[0] === "is" ? "isnt" : "is") + " " + args[1];
         },
         act: function(conf) {
           var res, testVal;
@@ -191,6 +191,7 @@ prolific = (function() {
       }
     };
     /*
+    method finder
     Arguments: where (string), what (array of matchers objects), callback (optional, function), multiple (boolean)
     "multiple" argument require a callback
     */
@@ -223,7 +224,7 @@ prolific = (function() {
         return found;
       }
     };
-    get_arguments = function() {
+    getArguments = function() {
       var argument, index, _args, _i, _len;
       _args = [];
       for (index = _i = 0, _len = arguments.length; _i < _len; index = ++_i) {
@@ -241,11 +242,11 @@ prolific = (function() {
       }
       return _args;
     };
-    run_matcher = function(matcherObj) {
-      args = get_arguments.apply(this, matcherObj.subjects);
+    runMatcher = function(matcherObj) {
+      args = getArguments.apply(this, matcherObj.subjects);
       return matcherObj.item.act.call(this, matcherObj);
     };
-    pre_actions = function() {
+    preActions = function() {
       var _this = this;
       finder(_assertions, sentencer, function(conf) {
         return _assertions = conf.item.act(conf);
@@ -259,7 +260,7 @@ prolific = (function() {
         _this = this;
       this.options = options;
       _assertions = assumptions;
-      pre_actions();
+      preActions();
       for (_i = 0, _len = _assertions.length; _i < _len; _i++) {
         assertion = _assertions[_i];
         matcherObj = finder(assertion, matchers);
@@ -267,14 +268,14 @@ prolific = (function() {
           waits(timer * 1000);
         }
         runs(function() {
-          return run_matcher.call(_this, matcherObj);
+          return runMatcher.call(_this, matcherObj);
         });
       }
       if (matcherObj === null) {
         throw Error("Can't find any test");
       }
     };
-    this.getArguments = get_arguments;
+    this.getArguments = getArguments;
     this.matchers = matchers;
     this.finder = finder;
   }
@@ -286,7 +287,7 @@ prolific = (function() {
       errstr += " (" + params + ")";
     }
     if (err.item.err != null) {
-      errstr += " (" + err.item.err(err) + ")";
+      errstr += " (" + (err.item.err(err)) + ")";
     }
     throw Error(errstr);
   };

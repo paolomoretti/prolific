@@ -19,7 +19,7 @@ class prolific
         reg: /(.+) (and|or) (.+)/
         get: "$1,$3"
         var: "$2"
-        act: (conf)=> _assertions = _assertions.split(" and ")
+        act: => _assertions = _assertions.split(" and ")
 
     matchers =
       "method has been called":
@@ -29,7 +29,7 @@ class prolific
         act: (conf)->
           _t = conf.subjects[0].split(".")
           _m = _t.pop()
-          eval("var _o = "+_t.join("."))
+          eval("var _o = #{_t.join(".")}")
           spyOn _o, _m
 
           throw Error "You must pass a function to execute to test if a method is called" unless @options?
@@ -45,9 +45,9 @@ class prolific
         get: "$1,$3"
         var: "$2"
         err: (conf)->
-          args[0] + " is "+(if conf.vars[0] in ["greater", ">"] then "lower" else "greater" )+" than " + args[1]
+          "#{args[0]} is #{(if conf.vars[0] in ["greater", ">"] then "lower" else "greater" )} than #{args[1]}"
         act: (conf)->
-          prolific.fail conf, num + " is not a number" for num in args when isNaN(num)
+          prolific.fail conf, "#{num} is not a number" for num in args when isNaN(num)
 
           if conf.vars[0] in ["greater", ">"] and (args[0] <= args[1] or `args[0] > args[1] == false`)
             prolific.fail conf
@@ -78,7 +78,7 @@ class prolific
         get: "$1,$4"
         var: "$2"
         err: (conf)->
-          args[0]+(if conf.vars[0] is "is" then " isnt " else " is ")+args[1]
+          "#{args[0]} #{(if conf.vars[0] is "is" then "isnt" else "is")} #{args[1]}"
         act: (conf)->
           res = if schema[0].name is "jquery" then args[0].is(args[1]) is true else args[0] is args[1]
           testVal = conf.vars[0] is "isnt"
@@ -90,7 +90,7 @@ class prolific
         reg: /\(([0-9-+./\*\(\)]+)\)/
         get: "$1"
         act: (conf)->
-          eval "var v = "+conf.subjects[0]
+          eval "var v = #{conf.subjects[0]}"
           return v
 
       var:
@@ -98,7 +98,7 @@ class prolific
         get: "$2"
         act: (conf)->
           try
-            eval("var v = "+conf.subjects[0])
+            eval "var v = #{conf.subjects[0]}"
             return v
           catch e
             return undefined if e.message.indexOf "undefined" > -1
@@ -116,13 +116,13 @@ class prolific
       string:
         reg: /^'(.+)'/
         get: "$1"
-        act: (conf)-> return conf.subjects[0]
+        act: (conf)-> conf.subjects[0]
 
       number:
         reg: /^([0-9.]+)$/
         get: "$1"
         act: (conf)->
-          return parseFloat(conf.subjects[0], 10)
+          parseFloat conf.subjects[0], 10
 
       jquery:
         reg: /^\$\(["'](.+)["']\)$/
@@ -135,6 +135,7 @@ class prolific
         act: (conf)-> conf.subjects[0]
 
     ###
+    method finder
     Arguments: where (string), what (array of matchers objects), callback (optional, function), multiple (boolean)
     "multiple" argument require a callback
     ###
@@ -150,21 +151,20 @@ class prolific
 
       if callback? and callback isnt false and multiple isnt true then callback(found) else return found
 
-    get_arguments = ->
+    getArguments = ->
       _args = []
       for argument,index in arguments
         finder argument, getters, (found)->
           if found is undefined then arg = argument else arg = found.item.act(found)
           _args.push arg
           schema[index] = found
-
       _args
 
-    run_matcher = (matcherObj)->
-      args = get_arguments.apply @, matcherObj.subjects
+    runMatcher = (matcherObj)->
+      args = getArguments.apply @, matcherObj.subjects
       matcherObj.item.act.call @, matcherObj
 
-    pre_actions = ->
+    preActions = ->
       finder _assertions, sentencer, (conf)=>
         _assertions = conf.item.act conf
       , true
@@ -175,27 +175,29 @@ class prolific
       @options = options
       _assertions = assumptions
 
-      do pre_actions
+      do preActions
 
       for assertion in _assertions
         matcherObj = finder assertion, matchers
 
         waits timer*1000 if timer > 0
-        runs => run_matcher.call @, matcherObj
+        runs => runMatcher.call @, matcherObj
 
       throw Error "Can't find any test" if matcherObj is null
 
-    @getArguments = get_arguments
+    @getArguments = getArguments
     @matchers     = matchers
     @finder       = finder
 
 
   @fail = (err, params)->
-    errstr = "Expetation '"+err.source+"' is not met"
-    errstr += " ("+params+")" if params?
-    errstr += " ("+err.item.err(err)+")" if err.item.err?
+    errstr = "Expetation '#{err.source}' is not met"
+    errstr += " (#{params})" if params?
+    errstr += " (#{err.item.err(err)})" if err.item.err?
 
     throw Error errstr
+
+
 
 beforeEach ->
   window.assume = (assumptions, options)=>
