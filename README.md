@@ -121,8 +121,10 @@ describe "on events", ->
     it "should trigger a given event and then do the test", ->
         $("body").append $("<div id='testEvent'></div>").on "click", ->
           window.b = "clicked"
+          console.log "test"
   
         assume "on click #testEvent then var b is 'clicked'"
+        assume "on click #testEvent then method console.log is called with 'test'"
         
         
 describe "more assumptions", ->
