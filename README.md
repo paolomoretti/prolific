@@ -86,12 +86,20 @@ describe "is greater than|is lower than|is < than|is > than", ->
 describe "method has been called", ->
 
     it "should spy and check if a method is called", ->
-        testobj = 
-            testmethod: ->
-                alert "test"
+      testobj = 
+          testmethod: ->
+              alert "test"
+              
+      assume "method testobj.testmethod is called", ->
+          testobj.testmethod()
                 
-        assume "method testobj.testmethod is called", ->
-            testobj.testmethod()
+    it "should spy and check if a method is called and call through", ->
+      testobj = 
+          testmethod: ->
+              alert "test"
+              
+      assume "method testobj.testmethod() is called", ->
+          testobj.testmethod()
             
     it "should spy and check if a method is called with argument", ->
         testobj = 

@@ -23,14 +23,15 @@ class prolific
 
     matchers =
       "method has been called":
-        reg: /^method (.+) (is called)( with |)(.+|)$/
+        reg: /^method ([a-z\.]+)(\(\)|) is called( with |)(.+|)$/
         get: "$1"
         var: "$2,$3,$4"
         act: (conf)->
           _t = conf.subjects[0].split(".")
           _m = _t.pop()
           eval("var _o = #{_t.join(".")}")
-          spyOn _o, _m
+          spy = spyOn _o, _m
+          do spy.andCallThrough if conf.vars[0] is "()"
 
           throw Error "You must pass a function to execute to test if a method is called" unless @options?
           @options.call @

@@ -203,11 +203,17 @@ describe("Prolific", function() {
     it("should be able to catch called method", function() {
       foo = {
         bar: function() {
-          return alert("test");
+          return window.b = 15;
         }
       };
       return assume("method foo.bar is called", function() {
         return foo.bar("test string");
+      });
+    });
+    it("should be able to catch a method call and run it", function() {
+      return assume("method foo.bar() is called", function() {
+        foo.bar("test string");
+        return assume("var window.b is 15");
       });
     });
     it("should be able to test argument of a called method", function() {

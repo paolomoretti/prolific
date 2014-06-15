@@ -226,10 +226,16 @@ describe "Prolific", ->
 
       foo =
         bar: ->
-          alert "test"
+          window.b = 15
 
       assume "method foo.bar is called", ->
-        foo.bar("test string")
+        foo.bar "test string"
+
+    it "should be able to catch a method call and run it", ->
+      assume "method foo.bar() is called", ->
+        foo.bar "test string"
+
+        assume "var window.b is 15"
 
     it "should be able to test argument of a called method", ->
 
