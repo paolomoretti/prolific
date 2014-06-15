@@ -115,6 +115,17 @@ describe "method has been called", ->
         assume "method testobj.testmethod is called with 'test string'", ->
             testobj.testmethod 'test string'
             
+describe "method or function throws error", ->
+    
+    it "should be able to catch errors", ->
+        testThrow = ->
+          assume "asd g ie"
+  
+        testNoThrow = ->
+          assume "3 is 3"
+  
+        assume "method testThrow throws error"
+        assume "method testNoThrow doesn't throw error"
             
 describe "in {x} seconds", ->
 

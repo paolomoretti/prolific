@@ -17,22 +17,20 @@ class prolific
           []
 
       "timer":
-        reg: /^in ([\d.]+) seconds (.+)$/
-        get: "$1,$2"
+        reg: /^(in|after) ([\d.]+) seconds (.+)$/
+        get: "$2,$3"
+        var: "$1"
         act: (conf)=>
-          timer = parseFloat conf.subjects[0], 10
-          _assertions = conf.subjects[1]
+          if conf.vars[0] in ["in","after"]
+            timer = parseFloat conf.subjects[0], 10
+            _assertions = conf.subjects[1]
 
     matchers =
       "method has been called":
-        reg: /^method ([a-z\.]+)(\(\)|) is called( with | ([\d]+) times|)(.+|)$/
+        reg: /^method ([A-Za-z\.]+)(\(\)|) is called( with | ([\d]+) times|)(.+|)$/
         get: "$1"
         var: "$2,$3,$4,$5"
         act: (conf)->
-          console.group "method called", conf
-
-          console.log "", conf.vars
-
           _t = conf.subjects[0].split(".")
           _m = _t.pop()
           eval("var _o = #{_t.join(".")}")
@@ -43,23 +41,14 @@ class prolific
 
           throw Error "You must pass a function to execute to test if a method is called" unless @options?
           @options.call @
-          console.groupEnd()
 
-
-
-          if conf.vars[1] is ""
-            console.log "test solo chiamata"
-            expect(eval conf.subjects[0]).toHaveBeenCalled()
-          else if conf.vars[1] is " with "
-            console.log "test chiamata with", conf.vars[2]
-            expect(eval conf.subjects[0]).toHaveBeenCalledWith eval(conf.vars[3])
-          else if conf.vars[1].indexOf "times" isnt -1
-            expect(spy.calls.length).toBe parseInt(conf.vars[2], 10)
-            console.log "test call number"
-
+          switch conf.vars[1]
+            when "" then expect(eval conf.subjects[0]).toHaveBeenCalled()
+            when " with " then expect(eval conf.subjects[0]).toHaveBeenCalledWith eval(conf.vars[3])
+            when /[\d]+ times/ then expect(spy.calls.length).toBe parseInt(conf.vars[2], 10)
 
       "mock method":
-        reg: /^method ([a-z\.]+) is (mock|mocked)$/
+        reg: /^method ([A-Za-z\.]+) is (mock|mocked)$/
         get: "$1"
         act: (conf)->
           _t = conf.subjects[0].split(".")
@@ -68,6 +57,16 @@ class prolific
 
           if not jasmine.isSpy _o[_m]
             spyOn(_o, _m).andCallFake @options
+
+      "method throw":
+        reg: /^method ([A-Za-z.]+) (throws|doesn't throw) error$/
+        get: "$1"
+        var: "$2"
+        act: (conf)=>
+          console.log "conf", conf, @
+          eval "var _m = #{conf.subjects[0]}"
+#          console.log "here", _m, testThrow
+          if conf.vars[0] is "throws" then expect(eval conf.subjects[0]).toThrow() else expect(eval conf.subjects[0]).not.toThrow()
 
       "is greater|lower than":
         reg: /(.+) is (greater|lower|>|<) than (.+)/
@@ -214,10 +213,9 @@ class prolific
       for assertion in _assertions
         matcherObj = finder assertion, matchers
 
+        throw Error "Prolific bad expression '#{assertion}'" if not matcherObj?
         waits timer*1000 if timer > 0
         runs => runMatcher.call @, matcherObj
-
-      throw Error "Can't find any test" if matcherObj is null
 
     @getArguments = getArguments
     @matchers     = matchers

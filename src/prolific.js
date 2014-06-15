@@ -24,23 +24,25 @@ prolific = (function() {
         }
       },
       "timer": {
-        reg: /^in ([\d.]+) seconds (.+)$/,
-        get: "$1,$2",
+        reg: /^(in|after) ([\d.]+) seconds (.+)$/,
+        get: "$2,$3",
+        "var": "$1",
         act: function(conf) {
-          timer = parseFloat(conf.subjects[0], 10);
-          return _assertions = conf.subjects[1];
+          var _ref;
+          if ((_ref = conf.vars[0]) === "in" || _ref === "after") {
+            timer = parseFloat(conf.subjects[0], 10);
+            return _assertions = conf.subjects[1];
+          }
         }
       }
     };
     matchers = {
       "method has been called": {
-        reg: /^method ([a-z\.]+)(\(\)|) is called( with | ([\d]+) times|)(.+|)$/,
+        reg: /^method ([A-Za-z\.]+)(\(\)|) is called( with | ([\d]+) times|)(.+|)$/,
         get: "$1",
         "var": "$2,$3,$4,$5",
         act: function(conf) {
           var spy, _m, _t;
-          console.group("method called", conf);
-          console.log("", conf.vars);
           _t = conf.subjects[0].split(".");
           _m = _t.pop();
           eval("var _o = " + (_t.join(".")));
@@ -54,21 +56,18 @@ prolific = (function() {
             throw Error("You must pass a function to execute to test if a method is called");
           }
           this.options.call(this);
-          console.groupEnd();
-          if (conf.vars[1] === "") {
-            console.log("test solo chiamata");
-            return expect(eval(conf.subjects[0])).toHaveBeenCalled();
-          } else if (conf.vars[1] === " with ") {
-            console.log("test chiamata with", conf.vars[2]);
-            return expect(eval(conf.subjects[0])).toHaveBeenCalledWith(eval(conf.vars[3]));
-          } else if (conf.vars[1].indexOf("times" !== -1)) {
-            expect(spy.calls.length).toBe(parseInt(conf.vars[2], 10));
-            return console.log("test call number");
+          switch (conf.vars[1]) {
+            case "":
+              return expect(eval(conf.subjects[0])).toHaveBeenCalled();
+            case " with ":
+              return expect(eval(conf.subjects[0])).toHaveBeenCalledWith(eval(conf.vars[3]));
+            case /[\d]+ times/:
+              return expect(spy.calls.length).toBe(parseInt(conf.vars[2], 10));
           }
         }
       },
       "mock method": {
-        reg: /^method ([a-z\.]+) is (mock|mocked)$/,
+        reg: /^method ([A-Za-z\.]+) is (mock|mocked)$/,
         get: "$1",
         act: function(conf) {
           var _m, _t;
@@ -77,6 +76,20 @@ prolific = (function() {
           eval("var _o = " + (_t.join(".")));
           if (!jasmine.isSpy(_o[_m])) {
             return spyOn(_o, _m).andCallFake(this.options);
+          }
+        }
+      },
+      "method throw": {
+        reg: /^method ([A-Za-z.]+) (throws|doesn't throw) error$/,
+        get: "$1",
+        "var": "$2",
+        act: function(conf) {
+          console.log("conf", conf, _this);
+          eval("var _m = " + conf.subjects[0]);
+          if (conf.vars[0] === "throws") {
+            return expect(eval(conf.subjects[0])).toThrow();
+          } else {
+            return expect(eval(conf.subjects[0])).not.toThrow();
           }
         }
       },
@@ -293,24 +306,26 @@ prolific = (function() {
       }
     };
     this.test = function(assumptions, options) {
-      var assertion, matcherObj, _i, _len,
+      var assertion, matcherObj, _i, _len, _results,
         _this = this;
       this.options = options;
       _assertions = assumptions;
       preActions();
+      _results = [];
       for (_i = 0, _len = _assertions.length; _i < _len; _i++) {
         assertion = _assertions[_i];
         matcherObj = finder(assertion, matchers);
+        if (matcherObj == null) {
+          throw Error("Prolific bad expression '" + assertion + "'");
+        }
         if (timer > 0) {
           waits(timer * 1000);
         }
-        runs(function() {
+        _results.push(runs(function() {
           return runMatcher.call(_this, matcherObj);
-        });
+        }));
       }
-      if (matcherObj === null) {
-        throw Error("Can't find any test");
-      }
+      return _results;
     };
     this.getArguments = getArguments;
     this.matchers = matchers;

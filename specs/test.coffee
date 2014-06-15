@@ -2,7 +2,7 @@ instance = new prolific()
 
 # Tests
 
-testme = testnull = testfalse = foo = a = null
+testme = testnull = testfalse = foo = a = testThrow = testNoThrow = null
 
 describe "Prolific", ->
 
@@ -148,6 +148,15 @@ describe "Prolific", ->
     it "should expose an assume method", ->
       expect(assume).toBeDefined()
 
+    it "should throw error if bad prolifc expression", ->
+      testThrow = ->
+        assume "asd g ie"
+
+      testNoThrow = ->
+        assume "3 is 3"
+
+      assume "method testThrow throws error"
+      assume "method testNoThrow doesn't throw error"
 
     it "should be able to test 'is|isnt' assumptions", ->
       assume "whenever is whenever"
@@ -215,12 +224,12 @@ describe "Prolific", ->
 
     it "should wait given seconds before run the test", ->
 
-      a = 0
+      a = 66
       setTimeout ->
-        a = 1
+        a = 6
       , 500
 
-      assume "in .51 seconds var a is 1"
+      assume "after .5 seconds var a is 6"
 
     it "should be able to catch called method", ->
 
