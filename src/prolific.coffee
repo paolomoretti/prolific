@@ -8,18 +8,20 @@ class prolific
     timer       = 0
 
     sentencer =
+      "and":
+        reg: /(.+) (and) (.+)/
+        get: "$1,$3"
+        act: (conf)=>
+          for spec in conf.subjects
+            @test spec, @options
+          []
+
       "timer":
         reg: /^in ([\d.]+) seconds (.+)$/
         get: "$1,$2"
         act: (conf)=>
           timer = parseFloat conf.subjects[0], 10
           _assertions = conf.subjects[1]
-
-      "and|or":
-        reg: /(.+) (and|or) (.+)/
-        get: "$1,$3"
-        var: "$2"
-        act: => _assertions = _assertions.split(" and ")
 
     matchers =
       "method has been called":
@@ -30,8 +32,10 @@ class prolific
           _t = conf.subjects[0].split(".")
           _m = _t.pop()
           eval("var _o = #{_t.join(".")}")
-          spy = spyOn _o, _m
-          do spy.andCallThrough if conf.vars[0] is "()"
+
+          if not jasmine.isSpy _o[_m]
+            spy = spyOn _o, _m
+            do spy.andCallThrough if conf.vars[0] is "()"
 
           throw Error "You must pass a function to execute to test if a method is called" unless @options?
           @options.call @
@@ -40,6 +44,17 @@ class prolific
             expect(eval conf.subjects[0]).toHaveBeenCalled()
           else
             expect(eval conf.subjects[0]).toHaveBeenCalledWith eval(conf.vars[2])
+
+      "mock method":
+        reg: /^method ([a-z\.]+) is (mock|mocked)$/
+        get: "$1"
+        act: (conf)->
+          _t = conf.subjects[0].split(".")
+          _m = _t.pop()
+          eval("var _o = #{_t.join(".")}")
+
+          if not jasmine.isSpy _o[_m]
+            spyOn(_o, _m).andCallFake @options
 
       "is greater|lower than":
         reg: /(.+) is (greater|lower|>|<) than (.+)/
@@ -170,9 +185,9 @@ class prolific
       args = getArguments.apply @, matcherObj.subjects
       matcherObj.item.act.call @, matcherObj
 
-    preActions = ->
+    preActions = =>
       finder _assertions, sentencer, (conf)=>
-        _assertions = conf.item.act conf
+        _assertions = conf.item.act.call @, conf
       , true
 
       _assertions = [_assertions] if typeof _assertions is "string"
@@ -207,4 +222,4 @@ class prolific
 
 beforeEach ->
   window.assume = (assumptions, options)=>
-    runs -> new prolific().test.call @, assumptions, options
+    new prolific().test assumptions, options

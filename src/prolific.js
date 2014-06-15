@@ -10,20 +10,25 @@ prolific = (function() {
     args = [];
     timer = 0;
     sentencer = {
+      "and": {
+        reg: /(.+) (and) (.+)/,
+        get: "$1,$3",
+        act: function(conf) {
+          var spec, _i, _len, _ref;
+          _ref = conf.subjects;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            spec = _ref[_i];
+            _this.test(spec, _this.options);
+          }
+          return [];
+        }
+      },
       "timer": {
         reg: /^in ([\d.]+) seconds (.+)$/,
         get: "$1,$2",
         act: function(conf) {
           timer = parseFloat(conf.subjects[0], 10);
           return _assertions = conf.subjects[1];
-        }
-      },
-      "and|or": {
-        reg: /(.+) (and|or) (.+)/,
-        get: "$1,$3",
-        "var": "$2",
-        act: function() {
-          return _assertions = _assertions.split(" and ");
         }
       }
     };
@@ -37,9 +42,11 @@ prolific = (function() {
           _t = conf.subjects[0].split(".");
           _m = _t.pop();
           eval("var _o = " + (_t.join(".")));
-          spy = spyOn(_o, _m);
-          if (conf.vars[0] === "()") {
-            spy.andCallThrough();
+          if (!jasmine.isSpy(_o[_m])) {
+            spy = spyOn(_o, _m);
+            if (conf.vars[0] === "()") {
+              spy.andCallThrough();
+            }
           }
           if (this.options == null) {
             throw Error("You must pass a function to execute to test if a method is called");
@@ -49,6 +56,19 @@ prolific = (function() {
             return expect(eval(conf.subjects[0])).toHaveBeenCalled();
           } else {
             return expect(eval(conf.subjects[0])).toHaveBeenCalledWith(eval(conf.vars[2]));
+          }
+        }
+      },
+      "mock method": {
+        reg: /^method ([a-z\.]+) is (mock|mocked)$/,
+        get: "$1",
+        act: function(conf) {
+          var _m, _t;
+          _t = conf.subjects[0].split(".");
+          _m = _t.pop();
+          eval("var _o = " + (_t.join(".")));
+          if (!jasmine.isSpy(_o[_m])) {
+            return spyOn(_o, _m).andCallFake(this.options);
           }
         }
       },
@@ -257,9 +277,8 @@ prolific = (function() {
       return matcherObj.item.act.call(this, matcherObj);
     };
     preActions = function() {
-      var _this = this;
       finder(_assertions, sentencer, function(conf) {
-        return _assertions = conf.item.act(conf);
+        return _assertions = conf.item.act.call(_this, conf);
       }, true);
       if (typeof _assertions === "string") {
         return _assertions = [_assertions];
@@ -309,8 +328,6 @@ prolific = (function() {
 beforeEach(function() {
   var _this = this;
   return window.assume = function(assumptions, options) {
-    return runs(function() {
-      return new prolific().test.call(this, assumptions, options);
-    });
+    return new prolific().test(assumptions, options);
   };
 });

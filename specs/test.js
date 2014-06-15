@@ -221,6 +221,14 @@ describe("Prolific", function() {
         return foo.bar("test string");
       });
     });
+    it("should be able to mock method return", function() {
+      assume("method foo.bar is mocked", function(newval) {
+        return window.b = newval;
+      });
+      return assume("method foo.bar is called and in .3 seconds var window.b is 13", function() {
+        return foo.bar(13);
+      });
+    });
     it("should trigger an event and then test", function() {
       var t;
       t = $("<div id='testEvent'></div>").on("click", function() {

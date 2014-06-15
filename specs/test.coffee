@@ -242,6 +242,13 @@ describe "Prolific", ->
       assume "method foo.bar is called with 'test string'", ->
         foo.bar "test string"
 
+    it "should be able to mock method return", ->
+      assume "method foo.bar is mocked", (newval)->
+        window.b = newval
+
+      assume "method foo.bar is called and in .3 seconds var window.b is 13", ->
+        foo.bar 13
+
     it "should trigger an event and then test", ->
       t = $("<div id='testEvent'></div>").on "click", ->
         window.b = "clicked"
