@@ -238,9 +238,10 @@ describe "Prolific", ->
         assume "var window.b is 15"
 
     it "should be able to test argument of a called method", ->
-
-      assume "method foo.bar is called with 'test string'", ->
-        foo.bar "test string"
+      assume "method foo.bar is called 3 times", ->
+        do foo.bar
+        do foo.bar
+        do foo.bar
 
     it "should be able to mock method return", ->
       assume "method foo.bar is mocked", (newval)->

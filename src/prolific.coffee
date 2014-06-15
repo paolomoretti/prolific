@@ -25,10 +25,14 @@ class prolific
 
     matchers =
       "method has been called":
-        reg: /^method ([a-z\.]+)(\(\)|) is called( with |)(.+|)$/
+        reg: /^method ([a-z\.]+)(\(\)|) is called( with | ([\d]+) times|)(.+|)$/
         get: "$1"
-        var: "$2,$3,$4"
+        var: "$2,$3,$4,$5"
         act: (conf)->
+          console.group "method called", conf
+
+          console.log "", conf.vars
+
           _t = conf.subjects[0].split(".")
           _m = _t.pop()
           eval("var _o = #{_t.join(".")}")
@@ -39,11 +43,20 @@ class prolific
 
           throw Error "You must pass a function to execute to test if a method is called" unless @options?
           @options.call @
+          console.groupEnd()
+
+
 
           if conf.vars[1] is ""
+            console.log "test solo chiamata"
             expect(eval conf.subjects[0]).toHaveBeenCalled()
-          else
-            expect(eval conf.subjects[0]).toHaveBeenCalledWith eval(conf.vars[2])
+          else if conf.vars[1] is " with "
+            console.log "test chiamata with", conf.vars[2]
+            expect(eval conf.subjects[0]).toHaveBeenCalledWith eval(conf.vars[3])
+          else if conf.vars[1].indexOf "times" isnt -1
+            expect(spy.calls.length).toBe parseInt(conf.vars[2], 10)
+            console.log "test call number"
+
 
       "mock method":
         reg: /^method ([a-z\.]+) is (mock|mocked)$/

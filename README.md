@@ -101,6 +101,12 @@ describe "method has been called", ->
       assume "method testobj.testmethod() is called", ->
           testobj.testmethod()
             
+    it "should be able to test argument of a called method", ->
+      assume "method testobj.testmethod is called 3 times", ->
+        do testobj.testmethod
+        do testobj.testmethod
+        do testobj.testmethod        
+     
     it "should spy and check if a method is called with argument", ->
         testobj = 
             testmethod: ->

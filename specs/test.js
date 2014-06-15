@@ -217,8 +217,10 @@ describe("Prolific", function() {
       });
     });
     it("should be able to test argument of a called method", function() {
-      return assume("method foo.bar is called with 'test string'", function() {
-        return foo.bar("test string");
+      return assume("method foo.bar is called 3 times", function() {
+        foo.bar();
+        foo.bar();
+        return foo.bar();
       });
     });
     it("should be able to mock method return", function() {
