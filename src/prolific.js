@@ -84,12 +84,43 @@ prolific = (function() {
         get: "$1",
         "var": "$2",
         act: function(conf) {
-          console.log("conf", conf, _this);
           eval("var _m = " + conf.subjects[0]);
           if (conf.vars[0] === "throws") {
             return expect(eval(conf.subjects[0])).toThrow();
           } else {
             return expect(eval(conf.subjects[0])).not.toThrow();
+          }
+        }
+      },
+      "assign value": {
+        reg: /^set (.+) with (\w+) ([^ ]+)( = | |)(.+|)$/,
+        get: "$1,$3,$5",
+        "var": "$2,$3,$4,$5",
+        act: function(conf) {
+          var _ref;
+          if (schema[0].name === "var" && conf.vars[0] === "value") {
+            return eval("window." + schema[0].subjects[0] + " = " + conf.subjects[1]);
+          } else if ((_ref = schema[0].name) === "jquery" || _ref === "jqueryshort") {
+            if (conf.vars[1] === "=") {
+              return args[0][conf.vars[0]](args[2]);
+            } else {
+              return args[0][conf.vars[0]](conf.vars[1], args[2]);
+            }
+          }
+        }
+      },
+      "on event": {
+        reg: /^on ([a-z]+) (.+) then (.+)$/,
+        get: "$3",
+        "var": "$1,$2",
+        act: function(conf) {
+          if (conf.subjects[0].indexOf("method") === 0) {
+            return new prolific().test(conf.subjects[0], function() {
+              return $(conf.vars[1]).trigger(conf.vars[0]);
+            });
+          } else {
+            $(conf.vars[1]).trigger(conf.vars[0]);
+            return new prolific().test(conf.subjects[0], this.options);
           }
         }
       },
@@ -122,23 +153,8 @@ prolific = (function() {
         get: "$1",
         "var": "$2",
         act: function(conf) {
-          if (args[0].size() === 0 && conf.vars[0] === "is") {
+          if ($(args[0]).size() === 0 && conf.vars[0] === "is") {
             return prolific.fail(conf);
-          }
-        }
-      },
-      "on event": {
-        reg: /^on ([a-z]+) (.+) then (.+)$/,
-        get: "$3",
-        "var": "$1,$2",
-        act: function(conf) {
-          if (conf.subjects[0].indexOf("method") === 0) {
-            return new prolific().test(conf.subjects[0], function() {
-              return $(conf.vars[1]).trigger(conf.vars[0]);
-            });
-          } else {
-            $(conf.vars[1]).trigger(conf.vars[0]);
-            return new prolific().test(conf.subjects[0], this.options);
           }
         }
       },

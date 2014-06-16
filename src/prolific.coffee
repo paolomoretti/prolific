@@ -63,10 +63,33 @@ class prolific
         get: "$1"
         var: "$2"
         act: (conf)=>
-          console.log "conf", conf, @
           eval "var _m = #{conf.subjects[0]}"
-#          console.log "here", _m, testThrow
           if conf.vars[0] is "throws" then expect(eval conf.subjects[0]).toThrow() else expect(eval conf.subjects[0]).not.toThrow()
+
+      "assign value":
+        reg: /^set (.+) with (\w+) ([^ ]+)( = | |)(.+|)$/
+        get: "$1,$3,$5"
+        var: "$2,$3,$4,$5"
+        act: (conf)->
+          if schema[0].name is "var" and conf.vars[0] is "value"
+            eval "window.#{schema[0].subjects[0]} = #{conf.subjects[1]}" # window variables
+          else if schema[0].name in ["jquery", "jqueryshort"]
+            if conf.vars[1] is "="
+              args[0][conf.vars[0]](args[2]) # methods with single value (ex: val)
+            else
+              args[0][conf.vars[0]](conf.vars[1],args[2]) # methods with 2 values (ex: attr)
+
+      "on event":
+        reg: /^on ([a-z]+) (.+) then (.+)$/
+        get: "$3"
+        var: "$1,$2"
+        act: (conf)->
+          if conf.subjects[0].indexOf("method") is 0
+            new prolific().test conf.subjects[0], ->
+              $(conf.vars[1]).trigger(conf.vars[0])
+          else
+            $(conf.vars[1]).trigger(conf.vars[0])
+            new prolific().test conf.subjects[0], @options
 
       "is greater|lower than":
         reg: /(.+) is (greater|lower|>|<) than (.+)/
@@ -86,20 +109,7 @@ class prolific
         reg: /(.+) (is|isnt) an (element)$/
         get: "$1"
         var: "$2"
-        act: (conf)->
-          prolific.fail conf if args[0].size() is 0 and conf.vars[0] is "is"
-
-      "on event":
-        reg: /^on ([a-z]+) (.+) then (.+)$/
-        get: "$3"
-        var: "$1,$2"
-        act: (conf)->
-          if conf.subjects[0].indexOf("method") is 0
-            new prolific().test conf.subjects[0], ->
-              $(conf.vars[1]).trigger(conf.vars[0])
-          else
-            $(conf.vars[1]).trigger(conf.vars[0])
-            new prolific().test conf.subjects[0], @options
+        act: (conf)-> prolific.fail conf if $(args[0]).size() is 0 and conf.vars[0] is "is"
 
       "is|isnt":
         reg: /(.+) (is|isnt) (?!(greater than|lower than|called))(.+)/
