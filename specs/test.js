@@ -267,7 +267,10 @@ describe("Prolific", function() {
       assume("set $ .assignclass with attr name = 'my name'");
       assume("$ .assignclass is [name='my name']");
       assume("set $ .assignclass with val = var x and var $('.assignclass').val() is '8'");
-      return assume("on focus .assignclass then set $ .assignclass with css border = '1px solid red'");
+      assume("on focus .assignclass then set $ .assignclass with css border = '1px solid red'");
+      return runs(function() {
+        return $(".assignclass").remove();
+      });
     });
     return it("should be able to wait for a condition before testing", function() {
       var x;

@@ -287,6 +287,8 @@ describe "Prolific", ->
       assume "set $ .assignclass with val = var x and var $('.assignclass').val() is '8'"
       assume "on focus .assignclass then set $ .assignclass with css border = '1px solid red'"
 
+      runs -> $(".assignclass").remove()
+
     it "should be able to wait for a condition before testing", ->
       a = b = 0
       x = ->
