@@ -2,13 +2,15 @@
 var prolific;
 
 prolific = (function() {
-  function prolific() {
-    var args, finder, getArguments, getters, matchers, preActions, runMatcher, schema, sentencer, timer, _assertions,
+  function prolific(hard) {
+    var args, fail, finder, getArguments, getters, matchers, preActions, runMatcher, schema, sentencer, throwError, timer, useRun, _assertions,
       _this = this;
     _assertions = null;
     schema = [];
     args = [];
     timer = 0;
+    throwError = hard != null ? hard : true;
+    useRun = true;
     sentencer = {
       "and": {
         reg: /(.+) (and) (.+)/,
@@ -20,6 +22,20 @@ prolific = (function() {
             spec = _ref[_i];
             _this.test(spec, _this.options);
           }
+          return [];
+        }
+      },
+      "waits for": {
+        reg: /^within (\d) seconds (.+) then (.+)$/,
+        get: "$1,$2,$3",
+        act: function(conf) {
+          var _this = this;
+          waitsFor(function() {
+            return new prolific(false).test(conf.subjects[1], this.options);
+          }, "condition " + conf.subjects[1], parseFloat(conf.subjects[0], 10) * 1000);
+          runs(function() {
+            return new prolific().test(conf.subjects[2], _this.options);
+          });
           return [];
         }
       },
@@ -137,14 +153,14 @@ prolific = (function() {
           for (_i = 0, _len = args.length; _i < _len; _i++) {
             num = args[_i];
             if (isNaN(num)) {
-              prolific.fail(conf, "" + num + " is not a number");
+              this.fail(conf, "" + num + " is not a number");
             }
           }
           if (((_ref = conf.vars[0]) === "greater" || _ref === ">") && (args[0] <= args[1] || args[0] > args[1] == false)) {
-            prolific.fail(conf);
+            this.fail(conf);
           }
           if (((_ref1 = conf.vars[0]) === "lower" || _ref1 === "<") && (args[0] >= args[1] || args[0] < args[1] == false)) {
-            return prolific.fail(conf);
+            return this.fail(conf);
           }
         }
       },
@@ -154,7 +170,7 @@ prolific = (function() {
         "var": "$2",
         act: function(conf) {
           if ($(args[0]).size() === 0 && conf.vars[0] === "is") {
-            return prolific.fail(conf);
+            return this.fail(conf);
           }
         }
       },
@@ -170,7 +186,7 @@ prolific = (function() {
           res = (_ref = schema[0].name) === "jquery" || _ref === "jqueryshort" ? args[0].is(args[1]) === true : args[0] === args[1];
           testVal = conf.vars[0] === "isnt";
           if (res === testVal) {
-            return prolific.fail(conf);
+            return this.fail(conf);
           }
         }
       }
@@ -321,13 +337,26 @@ prolific = (function() {
         return _assertions = [_assertions];
       }
     };
+    fail = function(err, params) {
+      var errstr;
+      errstr = "Expetation '" + err.source + "' is not met";
+      if (params != null) {
+        errstr += " (" + params + ")";
+      }
+      if (err.item.err != null) {
+        errstr += " (" + (err.item.err(err)) + ")";
+      }
+      if (this.throwError !== false) {
+        throw Error(errstr);
+      }
+      return false;
+    };
     this.test = function(assumptions, options) {
-      var assertion, matcherObj, _i, _len, _results,
+      var assertion, matcherObj, res, _i, _len,
         _this = this;
       this.options = options;
       _assertions = assumptions;
       preActions();
-      _results = [];
       for (_i = 0, _len = _assertions.length; _i < _len; _i++) {
         assertion = _assertions[_i];
         matcherObj = finder(assertion, matchers);
@@ -337,28 +366,26 @@ prolific = (function() {
         if (timer > 0) {
           waits(timer * 1000);
         }
-        _results.push(runs(function() {
-          return runMatcher.call(_this, matcherObj);
-        }));
+        if (this.throwError === true) {
+          runs(function() {
+            return runMatcher.call(_this, matcherObj);
+          });
+        } else {
+          res = runMatcher.call(this, matcherObj);
+          if (res != null) {
+            return res;
+          } else {
+            return true;
+          }
+        }
       }
-      return _results;
     };
     this.getArguments = getArguments;
     this.matchers = matchers;
     this.finder = finder;
+    this.throwError = throwError;
+    this.fail = fail;
   }
-
-  prolific.fail = function(err, params) {
-    var errstr;
-    errstr = "Expetation '" + err.source + "' is not met";
-    if (params != null) {
-      errstr += " (" + params + ")";
-    }
-    if (err.item.err != null) {
-      errstr += " (" + (err.item.err(err)) + ")";
-    }
-    throw Error(errstr);
-  };
 
   return prolific;
 

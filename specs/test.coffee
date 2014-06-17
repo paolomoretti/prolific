@@ -2,7 +2,7 @@ instance = new prolific()
 
 # Tests
 
-testme = testnull = testfalse = foo = a = testThrow = testNoThrow = null
+testme = testnull = testfalse = foo = a = b = c = testThrow = testNoThrow = null
 
 describe "Prolific", ->
 
@@ -287,4 +287,15 @@ describe "Prolific", ->
       assume "set $ .assignclass with val = var x and var $('.assignclass').val() is '8'"
       assume "on focus .assignclass then set $ .assignclass with css border = '1px solid red'"
 
+    it "should be able to wait for a condition before testing", ->
+      a = b = 0
+      x = ->
+        a = 1
+        b = 2
 
+      setTimeout ->
+        do x
+#        console.warn a, b
+      , 1000
+
+      assume "within 2 seconds var a is 1 then var b is 2"

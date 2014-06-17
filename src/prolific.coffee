@@ -1,11 +1,13 @@
 
 class prolific
 
-  constructor: ->
+  constructor: (hard)->
     _assertions = null
     schema      = []
     args        = []
     timer       = 0
+    throwError  = if hard? then hard else true
+    useRun      = true
 
     sentencer =
       "and":
@@ -14,6 +16,17 @@ class prolific
         act: (conf)=>
           for spec in conf.subjects
             @test spec, @options
+          []
+
+      "waits for":
+        reg: /^within (\d) seconds (.+) then (.+)$/
+        get: "$1,$2,$3"
+        act: (conf)->
+          waitsFor ->
+            return new prolific(false).test conf.subjects[1], @options
+          , "condition #{conf.subjects[1]}", parseFloat(conf.subjects[0],10)*1000
+
+          runs => new prolific().test conf.subjects[2], @options
           []
 
       "timer":
@@ -98,18 +111,18 @@ class prolific
         err: (conf)->
           "#{args[0]} is #{(if conf.vars[0] in ["greater", ">"] then "lower" else "greater" )} than #{args[1]}"
         act: (conf)->
-          prolific.fail conf, "#{num} is not a number" for num in args when isNaN(num)
+          @fail conf, "#{num} is not a number" for num in args when isNaN(num)
 
           if conf.vars[0] in ["greater", ">"] and (args[0] <= args[1] or `args[0] > args[1] == false`)
-            prolific.fail conf
+            @fail conf
           if conf.vars[0] in ["lower", "<"] and (args[0] >= args[1] or `args[0] < args[1] == false`)
-            prolific.fail conf
+            @fail conf
 
       "is|isnt an element":
         reg: /(.+) (is|isnt) an (element)$/
         get: "$1"
         var: "$2"
-        act: (conf)-> prolific.fail conf if $(args[0]).size() is 0 and conf.vars[0] is "is"
+        act: (conf)-> @fail conf if $(args[0]).size() is 0 and conf.vars[0] is "is"
 
       "is|isnt":
         reg: /(.+) (is|isnt) (?!(greater than|lower than|called))(.+)/
@@ -121,7 +134,7 @@ class prolific
           res = if schema[0].name in ["jquery", "jqueryshort"] then args[0].is(args[1]) is true else args[0] is args[1]
           testVal = conf.vars[0] is "isnt"
 
-          prolific.fail conf if res is testVal
+          @fail conf if res is testVal
 
     getters =
       math:
@@ -214,6 +227,14 @@ class prolific
 
       _assertions = [_assertions] if typeof _assertions is "string"
 
+    fail = (err, params)->
+      errstr = "Expetation '#{err.source}' is not met"
+      errstr += " (#{params})" if params?
+      errstr += " (#{err.item.err(err)})" if err.item.err?
+
+      throw Error errstr if @throwError isnt false
+      return false
+
     @test = (assumptions, options)->
       @options = options
       _assertions = assumptions
@@ -225,20 +246,18 @@ class prolific
 
         throw Error "Prolific bad expression '#{assertion}'" if not matcherObj?
         waits timer*1000 if timer > 0
-        runs => runMatcher.call @, matcherObj
+        if @throwError is true
+          runs =>
+            runMatcher.call @, matcherObj
+        else
+          res = runMatcher.call @, matcherObj
+          if res? then return res else return true
 
     @getArguments = getArguments
     @matchers     = matchers
     @finder       = finder
-
-
-  @fail = (err, params)->
-    errstr = "Expetation '#{err.source}' is not met"
-    errstr += " (#{params})" if params?
-    errstr += " (#{err.item.err(err)})" if err.item.err?
-
-    throw Error errstr
-
+    @throwError   = throwError
+    @fail         = fail
 
 
 beforeEach ->
