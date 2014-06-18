@@ -263,7 +263,7 @@ describe("Prolific", function() {
     it("should be able to assign a value", function() {
       assume("set var x with value 8 and var x is 8");
       assume("set var x with value '8' and var x is '8'");
-      $("body").append($("<input class='assignclass'/>"));
+      $("body").prepend($("<input class='assignclass'/>"));
       assume("set $ .assignclass with attr name = 'my name'");
       assume("$ .assignclass is [name='my name']");
       assume("set $ .assignclass with val = var x and var $('.assignclass').val() is '8'");
@@ -282,7 +282,8 @@ describe("Prolific", function() {
       setTimeout(function() {
         return x();
       }, 1000);
-      return assume("within 2 seconds var a is 1 then var b is 2");
+      assume("within 1 seconds var a is 1");
+      return assume("var b is 2");
     });
   });
 });

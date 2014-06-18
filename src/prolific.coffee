@@ -19,14 +19,14 @@ class prolific
           []
 
       "waits for":
-        reg: /^within (\d) seconds (.+) then (.+)$/
+        reg: /^within ([\d.]+) seconds (.+)$/
         get: "$1,$2,$3"
         act: (conf)->
           waitsFor ->
             return new prolific(false).test conf.subjects[1], @options
           , "condition #{conf.subjects[1]}", parseFloat(conf.subjects[0],10)*1000
 
-          runs => new prolific().test conf.subjects[2], @options
+#          runs => new prolific().test conf.subjects[2], @options if conf.subjects[2] isnt "go"
           []
 
       "timer":

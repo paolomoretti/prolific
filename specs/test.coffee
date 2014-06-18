@@ -281,7 +281,7 @@ describe "Prolific", ->
       assume "set var x with value 8 and var x is 8"
       assume "set var x with value '8' and var x is '8'"
 
-      $("body").append $("<input class='assignclass'/>")
+      $("body").prepend $("<input class='assignclass'/>")
       assume "set $ .assignclass with attr name = 'my name'"
       assume "$ .assignclass is [name='my name']"
       assume "set $ .assignclass with val = var x and var $('.assignclass').val() is '8'"
@@ -297,7 +297,7 @@ describe "Prolific", ->
 
       setTimeout ->
         do x
-#        console.warn a, b
       , 1000
 
-      assume "within 2 seconds var a is 1 then var b is 2"
+      assume "within 1 seconds var a is 1"
+      assume "var b is 2"
