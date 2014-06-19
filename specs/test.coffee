@@ -198,9 +198,10 @@ describe "Prolific", ->
       assume "var $('.test').size() is 1"
 
     it "should be able to test 'is|isnt an element' assumptions", ->
-      assume "$('.ciccio-pasticcio') isnt an element"
+      assume "$ .ciccio-pasticcio isnt an element"
 
-      $("body").append $('<div class="ciccio-pasticcio"></div>')
+      assume ->
+        $("body").append $('<div class="ciccio-pasticcio"></div>')
 
       assume "$ .ciccio-pasticcio is an element"
       assume "$ .ciccio-pasticcio is .ciccio-pasticcio"

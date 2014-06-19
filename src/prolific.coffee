@@ -1,3 +1,14 @@
+# Bootstrap
+throw Error "Prolific must be included after jasmine js file" if not beforeEach?
+console.warn "Prolific needs jQuery to test DOM elements" if not jQuery?
+
+###
+I'm working hard on this library and I really appreciate to know if it's actually useful to developers.
+That's why I'm interested in knowing how many people is using Prolific.
+The ajax call below only updates a counter and doesn't track anything else.
+Anyway, if you don't want the call, just remove the line :(
+###
+$.ajax "http://www.bitterbrown.com/prolific/countme.php"
 
 class prolific
 
@@ -20,13 +31,11 @@ class prolific
 
       "waits for":
         reg: /^within ([\d.]+) seconds (.+)$/
-        get: "$1,$2,$3"
+        get: "$1,$2"
         act: (conf)->
           waitsFor ->
             return new prolific(false).test conf.subjects[1], @options
           , "condition #{conf.subjects[1]}", parseFloat(conf.subjects[0],10)*1000
-
-#          runs => new prolific().test conf.subjects[2], @options if conf.subjects[2] isnt "go"
           []
 
       "timer":
@@ -119,10 +128,14 @@ class prolific
             @fail conf
 
       "is|isnt an element":
-        reg: /(.+) (is|isnt) an (element)$/
+        reg: /(.+) (is|isnt) an element$/
         get: "$1"
         var: "$2"
-        act: (conf)-> @fail conf if $(args[0]).size() is 0 and conf.vars[0] is "is"
+        act: (conf)->
+          if conf.vars[0] is "is"
+            @fail conf if args[0].length is 0
+          if conf.vars[0] is "isnt"
+            @fail conf if args[0].length > 0
 
       "is|isnt":
         reg: /(.+) (is|isnt) (?!(greater than|lower than|called))(.+)/
@@ -137,13 +150,6 @@ class prolific
           @fail conf if res is testVal
 
     getters =
-      math:
-        reg: /\(([0-9-+./\*\(\)]+)\)/
-        get: "$1"
-        act: (conf)->
-          eval "var v = #{conf.subjects[0]}"
-          return v
-
       var:
         reg: /(var )()/
         get: "$2"
@@ -184,6 +190,13 @@ class prolific
         reg: /^\$\(["'](.+)["']\)$/
         get: "$1"
         act: (conf)-> $(conf.subjects[0])
+
+      math:
+        reg: /^\((.+)\)$/
+        get: "$1"
+        act: (conf)->
+          eval "var v = #{conf.subjects[0]}"
+          return v
 
       generic:
         reg: ""
@@ -236,29 +249,31 @@ class prolific
       return false
 
     @test = (assumptions, options)->
-      @options = options
-      _assertions = assumptions
+      if typeof assumptions isnt "string"
+        runs assumptions
+      else
+        @options = options
+        _assertions = assumptions
 
-      do preActions
+        do preActions
 
-      for assertion in _assertions
-        matcherObj = finder assertion, matchers
+        for assertion in _assertions
+          matcherObj = finder assertion, matchers
 
-        throw Error "Prolific bad expression '#{assertion}'" if not matcherObj?
-        waits timer*1000 if timer > 0
-        if @throwError is true
-          runs =>
-            runMatcher.call @, matcherObj
-        else
-          res = runMatcher.call @, matcherObj
-          if res? then return res else return true
+          throw Error "Prolific bad expression '#{assertion}'" if not matcherObj?
+          waits timer*1000 if timer > 0
+          if @throwError is true
+            runs =>
+              runMatcher.call @, matcherObj
+          else
+            res = runMatcher.call @, matcherObj
+            if res? then return res else return true
 
     @getArguments = getArguments
     @matchers     = matchers
     @finder       = finder
     @throwError   = throwError
     @fail         = fail
-
 
 beforeEach ->
   window.assume = (assumptions, options)=>

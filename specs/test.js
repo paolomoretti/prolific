@@ -183,8 +183,10 @@ describe("Prolific", function() {
       return assume("var $('.test').size() is 1");
     });
     it("should be able to test 'is|isnt an element' assumptions", function() {
-      assume("$('.ciccio-pasticcio') isnt an element");
-      $("body").append($('<div class="ciccio-pasticcio"></div>'));
+      assume("$ .ciccio-pasticcio isnt an element");
+      assume(function() {
+        return $("body").append($('<div class="ciccio-pasticcio"></div>'));
+      });
       assume("$ .ciccio-pasticcio is an element");
       assume("$ .ciccio-pasticcio is .ciccio-pasticcio");
       assume("$ .ciccio-pasticcio is :not(.asdad)");

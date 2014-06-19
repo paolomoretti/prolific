@@ -1,7 +1,9 @@
 # Prolific
+![alt Prolific logo](http://www.bitterbrown.com/prolific/assets/logo.png)
 ---
 
-### Make jasmine talk ![alt build status](https://drone.io/github.com/paolomoretti/prolific/status.png)
+### Let's talk to Jasmine 
+![alt build status](https://drone.io/github.com/paolomoretti/prolific/status.png)
 
 Prolific is a library meant to be used along with Jasmine 1.3.
 
@@ -21,16 +23,99 @@ It requires **jquery** to process elements and it accepts jquery expressions for
 
 It works around assumptions using the function ```assume()```
 
-```coffeescript
+```
 describe "Generic test suite", ->
     it "should have prolific working", ->
         assume "3 is 3"
-        
 ```
 
 Every assumption accepts several types of arguments.
 
+---
+### How it works
 
+Every test is run using assume method, which is used as a **sentence**
+
+Every **sentence** can have particular behaviours involved and runs **matchers** to get the type of test needed
+
+Every **matcher** is analized with a set of **getters** that are responsible to evaluate the code
+
+ 
+---
+### Sentence
+Typically, a sentence follows this structure: {subject 1} {comparator} {subjects 2}
+``` assume "5 is 5" ```
+
+A sentence has a list of possible additional variables:
+
+- **and**
+  Used to test more than one condition in the same assumption:
+  
+  ``` assume "2 is 2 and 'foo' isnt 'bar'" ```
+  
+- **within {x} seconds {matcher}** used to wait until *matcher* condition is true (not more than {x} seconds)
+
+  ``` assume "within 3 seconds var foo is 'bar'" ```
+
+- **in | after {x} seconds {matcher}** used to wait {x} seconds before test the *matcher* condition
+
+  ``` assume "after .5 seconds 'string' isnt 'oldstring'" ```
+
+**IMPORTANT** Those variable can be used just a single time per sentence
+
+---
+### Matchers
+A sentence is generally made out of a matcher, or more then one if a variable *and* is used
+``` assume "{matcher}" ```
+
+###### List of possible matchers
+
+- **Method spy**
+
+  ``` assume "method foo.bar is called" ``` Method foo.bar is then spyed and the real method is not called
+  
+  ``` assume "method foo.bar() is called" ``` The method is also called (same as .andCallThrough())
+  
+  ``` assume "method foo.bar is called with 'argument'" ``` Method foo.bar is spyed and the argument is checked
+  
+  ``` assume "method foo.bar is called 3 times" ``` Check how many times the method has been called
+  
+- **Method mock**
+
+  ``` 
+  assume "method jQuery.ajax is mock", (params)->
+  	do param.success
+   ``` 
+   Mocking a method creates a spy on it
+   
+- **Method throws**
+
+  ``` assume "method foo.invalid throws error" ```  
+  ``` assume "method foo.valid doesn't throws error" ```
+  
+- **assign value** (use with caution)
+  
+  ``` assume "set var foo with value 4" ``` Same as windows.foo = 4
+  
+  *var foo* is a getter, ie a particular expression that is interpretated. See below for the list of possible   **getters**
+  
+  ``` assume "set $('.foo') with css margin-top 4px" ``` In this case the *getter* is a jquery element, so .css() jquery function is called with 2 parameters.
+  
+  You can use all jquery element method using a jquery *getter*
+  
+- **on event**
+
+  ``` assume "on click .classname then var foo is 5" ``` 
+  
+  Structure: on {event_name} {jquery expression} then {sentence}
+  
+  Because the last variable is a **sentence**, you can use a more complex assumption, as:
+  
+  ``` assume "on click .classname then in 2 seconds method foo.bar is called with 'string value'" ```
+  
+
+---
+---
 ### Testing examples
 ```coffeescript
 describe "is|isnt comparator", ->
