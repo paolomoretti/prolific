@@ -34,12 +34,19 @@ Every assumption accepts several types of arguments.
 ---
 ### How it works
 
-Every test is run using assume method, which is used as a **sentence**
+Every test is ran using *assume* method, which is used to define one or more **sentence**s
 
-Every **sentence** can have particular behaviours involved and runs **matchers** to get the type of test needed
+* **SENTENCE** A sentence is made with 1 or more matchers and some optional variables
+* **MATCHERS** are used within a sentence and define the type of comparison/test you want to execute
+* **GETTERS** are used within matchers to catch the type of arguments used within a matcher
 
-Every **matcher** is analized with a set of **getters** that are responsible to evaluate the code
+Let's take as example this "assumption"
 
+``` assume "on click .classname then var a is (var total - 1)" ```
+
+- **on click .classname then var a is (var total - 1)** is the sentence
+- **on \<event name> \<jquery expression> then \<new sentence>** is the matcher (of type event)
+- **var \<var_name>** and **(\<javascript math code>)** are the getters
  
 ---
 ### Sentence
@@ -69,6 +76,10 @@ A sentence is generally made out of a matcher, or more then one if a variable *a
 ``` assume "{matcher}" ```
 
 ###### List of possible matchers
+
+- **equality**
+  
+  ``` assume "4 is 5" ```, ``` assume "var a isnt 'string value'" ``` You just have to use **\<getter> is \<getter>** or isnt
 
 - **Method spy**
 
