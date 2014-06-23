@@ -142,6 +142,43 @@ describe "Prolific", ->
         expect(found.vars[0]).toBe "is"
 
 
+  describe "getters", ->
+
+    describe "- var", ->
+
+      it "should catch variable name", ->
+        found = instance.finder "var gettest", instance.getters
+
+        expect(found.name).toBe "var"
+        expect(found.item.act(found)).toBe undefined
+
+      it "should catch object", ->
+        found = instance.finder "var {a: 'b'}", instance.getters
+
+        expect(found.name).toBe "var"
+        expect(found.item.act(found)).toEqual {a: 'b'}
+
+      it "should catch array", ->
+        found = instance.finder "var [4, 5, undefined]", instance.getters
+
+        expect(found.name).toBe "var"
+        expect(found.item.act(found)).toEqual [4, 5, undefined]
+
+      it "should catch jquery element", ->
+        found = instance.finder "var $('body')", instance.getters
+
+        expect(found.name).toBe "var"
+        expect(found.item.act(found)).toEqual $('body')
+
+      it "should catch math", ->
+        window.testmath = 3
+        window.returnFive = ->
+          return 5
+        found = instance.finder "var (4/2) * testmath - returnFive()", instance.getters
+
+        expect(found.name).toBe "var"
+        expect(found.item.act(found)).toEqual 1
+
 
   describe "assume", ->
 
@@ -269,6 +306,23 @@ describe "Prolific", ->
 
       assume "on click #testEvent then var b is 'clicked'"
       assume "on click #testEvent then method console.log is called with 'test'"
+
+    xit "should test a method called and the arguments", ->
+      a = {
+        b: -> false
+      }
+
+      assume "method a.b is called with var {c: 'd'}", ->
+        a.b c: "d"
+
+      assume "method a.b is called with var (4/2)", ->
+        a.b 2
+
+      assume "method a.b is called with $ body", ->
+        a.b $("body")
+
+      assume "method alert is called with var [4, 5, 'a']", ->
+        alert [4, 5, 'a']
 
     it "should trigger an event and wait before check", ->
       $("body").append $("<div id='testEventDelayed'></div>").on "click", =>

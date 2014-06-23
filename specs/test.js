@@ -135,6 +135,46 @@ describe("Prolific", function() {
       });
     });
   });
+  describe("getters", function() {
+    return describe("- var", function() {
+      it("should catch variable name", function() {
+        var found;
+        found = instance.finder("var gettest", instance.getters);
+        expect(found.name).toBe("var");
+        return expect(found.item.act(found)).toBe(void 0);
+      });
+      it("should catch object", function() {
+        var found;
+        found = instance.finder("var {a: 'b'}", instance.getters);
+        expect(found.name).toBe("var");
+        return expect(found.item.act(found)).toEqual({
+          a: 'b'
+        });
+      });
+      it("should catch array", function() {
+        var found;
+        found = instance.finder("var [4, 5, undefined]", instance.getters);
+        expect(found.name).toBe("var");
+        return expect(found.item.act(found)).toEqual([4, 5, void 0]);
+      });
+      it("should catch jquery element", function() {
+        var found;
+        found = instance.finder("var $('body')", instance.getters);
+        expect(found.name).toBe("var");
+        return expect(found.item.act(found)).toEqual($('body'));
+      });
+      return it("should catch math", function() {
+        var found;
+        window.testmath = 3;
+        window.returnFive = function() {
+          return 5;
+        };
+        found = instance.finder("var (4/2) * testmath - returnFive()", instance.getters);
+        expect(found.name).toBe("var");
+        return expect(found.item.act(found)).toEqual(1);
+      });
+    });
+  });
   return describe("assume", function() {
     it("should expose an assume method", function() {
       return expect(assume).toBeDefined();
@@ -252,6 +292,27 @@ describe("Prolific", function() {
       $("body").append(t);
       assume("on click #testEvent then var b is 'clicked'");
       return assume("on click #testEvent then method console.log is called with 'test'");
+    });
+    xit("should test a method called and the arguments", function() {
+      a = {
+        b: function() {
+          return false;
+        }
+      };
+      assume("method a.b is called with var {c: 'd'}", function() {
+        return a.b({
+          c: "d"
+        });
+      });
+      assume("method a.b is called with var (4/2)", function() {
+        return a.b(2);
+      });
+      assume("method a.b is called with $ body", function() {
+        return a.b($("body"));
+      });
+      return assume("method alert is called with var [4, 5, 'a']", function() {
+        return alert([4, 5, 'a']);
+      });
     });
     it("should trigger an event and wait before check", function() {
       var _this = this;

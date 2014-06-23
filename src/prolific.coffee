@@ -53,20 +53,27 @@ class prolific
         get: "$1"
         var: "$2,$3,$4,$5"
         act: (conf)->
-          _t = conf.subjects[0].split(".")
-          _m = _t.pop()
-          eval("var _o = #{_t.join(".")}")
+          if conf.subjects[0].indexOf(".") isnt -1
+            _t = conf.subjects[0].split(".")
+            _m = _t.pop()
+            eval "var _o = #{_t.join(".")}"
+            spy = spyOn _o, _m unless jasmine.isSpy _o[_m]
+          else
+            spy = spyOn window, conf.subjects[0] unless jasmine.isSpy window[conf.subjects[0]]
 
-          if not jasmine.isSpy _o[_m]
-            spy = spyOn _o, _m
-            do spy.andCallThrough if conf.vars[0] is "()"
+          do spy.andCallThrough if conf.vars[0] is "()"
 
           throw Error "You must pass a function to execute to test if a method is called" unless @options?
           @options.call @
 
+          _exp = expect(eval conf.subjects[0])
           switch conf.vars[1]
-            when "" then expect(eval conf.subjects[0]).toHaveBeenCalled()
-            when " with " then expect(eval conf.subjects[0]).toHaveBeenCalledWith eval(conf.vars[3])
+            when "" then _exp.toHaveBeenCalled()
+            when " with "
+              methodArgGetter = finder conf.vars[3], getters
+              _args = methodArgGetter.item.act methodArgGetter
+
+              _exp.toHaveBeenCalledWith.apply _exp, (if jQuery.type _args isnt "array" then [_args] else _args)
             when /[\d]+ times/ then expect(spy.calls.length).toBe parseInt(conf.vars[2], 10)
 
       "mock method":
@@ -78,7 +85,7 @@ class prolific
           eval("var _o = #{_t.join(".")}")
 
           if not jasmine.isSpy _o[_m]
-            spyOn(_o, _m).andCallFake @options
+            spyOn(_o, _m).andCallFake @options if _o isnt null
 
       "method throw":
         reg: /^method ([A-Za-z.]+) (throws|doesn't throw) error$/
@@ -151,9 +158,10 @@ class prolific
 
     getters =
       var:
-        reg: /(var )()/
+        reg: /(var )(.+)/
         get: "$2"
         act: (conf)->
+          conf.subjects[0] = conf.subjects.join(",") if conf.subjects.length > 1
           try
             eval "var v = #{conf.subjects[0]}"
             return v
@@ -271,6 +279,7 @@ class prolific
 
     @getArguments = getArguments
     @matchers     = matchers
+    @getters      = getters
     @finder       = finder
     @throwError   = throwError
     @fail         = fail

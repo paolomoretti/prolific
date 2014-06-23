@@ -72,25 +72,34 @@ prolific = (function() {
         get: "$1",
         "var": "$2,$3,$4,$5",
         act: function(conf) {
-          var spy, _m, _t;
-          _t = conf.subjects[0].split(".");
-          _m = _t.pop();
-          eval("var _o = " + (_t.join(".")));
-          if (!jasmine.isSpy(_o[_m])) {
-            spy = spyOn(_o, _m);
-            if (conf.vars[0] === "()") {
-              spy.andCallThrough();
+          var methodArgGetter, spy, _args, _exp, _m, _t;
+          if (conf.subjects[0].indexOf(".") !== -1) {
+            _t = conf.subjects[0].split(".");
+            _m = _t.pop();
+            eval("var _o = " + (_t.join(".")));
+            if (!jasmine.isSpy(_o[_m])) {
+              spy = spyOn(_o, _m);
             }
+          } else {
+            if (!jasmine.isSpy(window[conf.subjects[0]])) {
+              spy = spyOn(window, conf.subjects[0]);
+            }
+          }
+          if (conf.vars[0] === "()") {
+            spy.andCallThrough();
           }
           if (this.options == null) {
             throw Error("You must pass a function to execute to test if a method is called");
           }
           this.options.call(this);
+          _exp = expect(eval(conf.subjects[0]));
           switch (conf.vars[1]) {
             case "":
-              return expect(eval(conf.subjects[0])).toHaveBeenCalled();
+              return _exp.toHaveBeenCalled();
             case " with ":
-              return expect(eval(conf.subjects[0])).toHaveBeenCalledWith(eval(conf.vars[3]));
+              methodArgGetter = finder(conf.vars[3], getters);
+              _args = methodArgGetter.item.act(methodArgGetter);
+              return _exp.toHaveBeenCalledWith.apply(_exp, (jQuery.type(_args !== "array") ? [_args] : _args));
             case /[\d]+ times/:
               return expect(spy.calls.length).toBe(parseInt(conf.vars[2], 10));
           }
@@ -105,7 +114,9 @@ prolific = (function() {
           _m = _t.pop();
           eval("var _o = " + (_t.join(".")));
           if (!jasmine.isSpy(_o[_m])) {
-            return spyOn(_o, _m).andCallFake(this.options);
+            if (_o !== null) {
+              return spyOn(_o, _m).andCallFake(this.options);
+            }
           }
         }
       },
@@ -214,10 +225,13 @@ prolific = (function() {
     };
     getters = {
       "var": {
-        reg: /(var )()/,
+        reg: /(var )(.+)/,
         get: "$2",
         act: function(conf) {
           var e;
+          if (conf.subjects.length > 1) {
+            conf.subjects[0] = conf.subjects.join(",");
+          }
           try {
             eval("var v = " + conf.subjects[0]);
             return v;
@@ -407,6 +421,7 @@ prolific = (function() {
     };
     this.getArguments = getArguments;
     this.matchers = matchers;
+    this.getters = getters;
     this.finder = finder;
     this.throwError = throwError;
     this.fail = fail;
