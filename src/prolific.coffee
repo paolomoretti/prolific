@@ -95,6 +95,7 @@ class prolific
           eval "var _m = #{conf.subjects[0]}"
           if conf.vars[0] is "throws" then expect(eval conf.subjects[0]).toThrow() else expect(eval conf.subjects[0]).not.toThrow()
 
+      #TODO: unstable, maybe better to remove it
       "assign value":
         reg: /^set (.+) with (\w+) ([^ ]+)( = | |)(.+|)$/
         get: "$1,$3,$5"
@@ -121,7 +122,7 @@ class prolific
             new prolific().test conf.subjects[0], @options
 
       "is greater|lower than":
-        reg: /(.+) is (greater|lower|>|<) than (.+)/
+        reg: /^(.+) is (greater|lower|>|<) than (.+)$/
         get: "$1,$3"
         var: "$2"
         err: (conf)->
@@ -135,7 +136,7 @@ class prolific
             @fail conf
 
       "is|isnt an element":
-        reg: /(.+) (is|isnt) an element$/
+        reg: /^(.+) (is|isnt) an element$/
         get: "$1"
         var: "$2"
         act: (conf)->
@@ -158,8 +159,8 @@ class prolific
 
     getters =
       var:
-        reg: /(var )(.+)/
-        get: "$2"
+        reg: /^(?:var )(.+)$/
+        get: "$1"
         act: (conf)->
           conf.subjects[0] = conf.subjects.join(",") if conf.subjects.length > 1
           try
@@ -170,7 +171,7 @@ class prolific
             return null if e.message.indexOf "null" > -1
 
       reserved:
-        reg: /(null|undefined|false|true)/
+        reg: /^(null|undefined|false|true)$/
         get: "$1"
         act: (conf)->
           return undefined if conf.subjects[0] is "undefined"
@@ -179,7 +180,7 @@ class prolific
           return true if conf.subjects[0] is "true"
 
       string:
-        reg: /^'(.+)'/
+        reg: /^'(.+)'$/
         get: "$1"
         act: (conf)-> conf.subjects[0]
 

@@ -166,7 +166,7 @@ prolific = (function() {
         }
       },
       "is greater|lower than": {
-        reg: /(.+) is (greater|lower|>|<) than (.+)/,
+        reg: /^(.+) is (greater|lower|>|<) than (.+)$/,
         get: "$1,$3",
         "var": "$2",
         err: function(conf) {
@@ -190,7 +190,7 @@ prolific = (function() {
         }
       },
       "is|isnt an element": {
-        reg: /(.+) (is|isnt) an element$/,
+        reg: /^(.+) (is|isnt) an element$/,
         get: "$1",
         "var": "$2",
         act: function(conf) {
@@ -225,8 +225,8 @@ prolific = (function() {
     };
     getters = {
       "var": {
-        reg: /(var )(.+)/,
-        get: "$2",
+        reg: /^(?:var )(.+)$/,
+        get: "$1",
         act: function(conf) {
           var e;
           if (conf.subjects.length > 1) {
@@ -247,7 +247,7 @@ prolific = (function() {
         }
       },
       reserved: {
-        reg: /(null|undefined|false|true)/,
+        reg: /^(null|undefined|false|true)$/,
         get: "$1",
         act: function(conf) {
           if (conf.subjects[0] === "undefined") {
@@ -265,7 +265,7 @@ prolific = (function() {
         }
       },
       string: {
-        reg: /^'(.+)'/,
+        reg: /^'(.+)'$/,
         get: "$1",
         act: function(conf) {
           return conf.subjects[0];
