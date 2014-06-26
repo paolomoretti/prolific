@@ -64,6 +64,22 @@ describe "Prolific", ->
       expect(null).toBe instance.getArguments("null")[0]
 
 
+  describe "Routines", ->
+
+    it "should be able to set a routine", ->
+      prolific::routines =
+        "catch me if you can": ->
+          alert "cought you"
+          console.log "si"
+
+      assume "method window.alert is called", ->
+        assume "catch me if you can"
+
+    it "should still have the routine after a test", ->
+      assume "method window.alert is called", ->
+        assume "catch me if you can"
+
+
   describe "assumption matchers", ->
 
 

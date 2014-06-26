@@ -12,13 +12,15 @@ $.ajax "http://www.bitterbrown.com/prolific/countme.php"
 
 class prolific
 
+  routines: {}
+
   constructor: (hard)->
     _assertions = null
     schema      = []
     args        = []
     timer       = 0
     throwError  = if hard? then hard else true
-    useRun      = true
+    wasRoutine  = false
 
     sentencer =
       "and":
@@ -85,7 +87,8 @@ class prolific
           eval("var _o = #{_t.join(".")}")
 
           if not jasmine.isSpy _o[_m]
-            spyOn(_o, _m).andCallFake @options if _o isnt null
+            spy = spyOn(_o, _m) if _o isnt null
+            spy.andCallFake @options if @options?
 
       "method throw":
         reg: /^method ([A-Za-z.]+) (throws|doesn't throw) error$/
@@ -95,7 +98,7 @@ class prolific
           eval "var _m = #{conf.subjects[0]}"
           if conf.vars[0] is "throws" then expect(eval conf.subjects[0]).toThrow() else expect(eval conf.subjects[0]).not.toThrow()
 
-      #TODO: unstable, maybe better to remove it
+    #TODO: unstable, maybe better to remove it
       "assign value":
         reg: /^set (.+) with (\w+) ([^ ]+)( = | |)(.+|)$/
         get: "$1,$3,$5"
@@ -144,6 +147,18 @@ class prolific
             @fail conf if args[0].length is 0
           if conf.vars[0] is "isnt"
             @fail conf if args[0].length > 0
+
+      "is|isnt equal to":
+        reg: /^(.+) (is|isnt) (?:equal to) (.+)$/
+        get: "$1,$3"
+        var: "$2"
+        err: (conf)->
+          "#{args[0]} #{(if conf.vars[0] is "is" then "isnt" else "is")} equal to #{args[1]}"
+        act: (conf)->
+          res = `args[0] == args[1]`
+          testVal = conf.vars[0] is "isnt"
+
+          @fail conf if res is testVal
 
       "is|isnt":
         reg: /(.+) (is|isnt) (?!(greater than|lower than|called))(.+)/
@@ -212,6 +227,7 @@ class prolific
         get: ""
         act: (conf)-> conf.subjects[0]
 
+
     ###
     method finder
     Arguments: where (string), what (array of matchers objects), callback (optional, function), multiple (boolean)
@@ -242,6 +258,12 @@ class prolific
       args = getArguments.apply @, matcherObj.subjects
       matcherObj.item.act.call @, matcherObj
 
+    runRoutines = =>
+      for assertion in _assertions when @routines[assertion]?
+        do @routines[assertion]
+        wasRoutine = true
+        break
+
     preActions = =>
       finder _assertions, sentencer, (conf)=>
         _assertions = conf.item.act.call @, conf
@@ -249,8 +271,10 @@ class prolific
 
       _assertions = [_assertions] if typeof _assertions is "string"
 
+      do runRoutines
+
     fail = (err, params)->
-      errstr = "Expetation '#{err.source}' is not met"
+      errstr = "Expectation '#{err.source}' is not met"
       errstr += " (#{params})" if params?
       errstr += " (#{err.item.err(err)})" if err.item.err?
 
@@ -266,7 +290,7 @@ class prolific
 
         do preActions
 
-        for assertion in _assertions
+        for assertion in _assertions when not wasRoutine
           matcherObj = finder assertion, matchers
 
           throw Error "Prolific bad expression '#{assertion}'" if not matcherObj?

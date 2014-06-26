@@ -20,15 +20,17 @@ Anyway, if you don't want the call, just remove the line :(
 $.ajax("http://www.bitterbrown.com/prolific/countme.php");
 
 prolific = (function() {
+  prolific.prototype.routines = {};
+
   function prolific(hard) {
-    var args, fail, finder, getArguments, getters, matchers, preActions, runMatcher, schema, sentencer, throwError, timer, useRun, _assertions,
+    var args, fail, finder, getArguments, getters, matchers, preActions, runMatcher, runRoutines, schema, sentencer, throwError, timer, wasRoutine, _assertions,
       _this = this;
     _assertions = null;
     schema = [];
     args = [];
     timer = 0;
     throwError = hard != null ? hard : true;
-    useRun = true;
+    wasRoutine = false;
     sentencer = {
       "and": {
         reg: /(.+) (and) (.+)/,
@@ -109,13 +111,16 @@ prolific = (function() {
         reg: /^method ([A-Za-z\.]+) is (mock|mocked)$/,
         get: "$1",
         act: function(conf) {
-          var _m, _t;
+          var spy, _m, _t;
           _t = conf.subjects[0].split(".");
           _m = _t.pop();
           eval("var _o = " + (_t.join(".")));
           if (!jasmine.isSpy(_o[_m])) {
             if (_o !== null) {
-              return spyOn(_o, _m).andCallFake(this.options);
+              spy = spyOn(_o, _m);
+            }
+            if (this.options != null) {
+              return spy.andCallFake(this.options);
             }
           }
         }
@@ -203,6 +208,22 @@ prolific = (function() {
             if (args[0].length > 0) {
               return this.fail(conf);
             }
+          }
+        }
+      },
+      "is|isnt equal to": {
+        reg: /^(.+) (is|isnt) (?:equal to) (.+)$/,
+        get: "$1,$3",
+        "var": "$2",
+        err: function(conf) {
+          return "" + args[0] + " " + (conf.vars[0] === "is" ? "isnt" : "is") + " equal to " + args[1];
+        },
+        act: function(conf) {
+          var res, testVal;
+          res = args[0] == args[1];
+          testVal = conf.vars[0] === "isnt";
+          if (res === testVal) {
+            return this.fail(conf);
           }
         }
       },
@@ -364,17 +385,32 @@ prolific = (function() {
       args = getArguments.apply(this, matcherObj.subjects);
       return matcherObj.item.act.call(this, matcherObj);
     };
+    runRoutines = function() {
+      var assertion, _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = _assertions.length; _i < _len; _i++) {
+        assertion = _assertions[_i];
+        if (!(_this.routines[assertion] != null)) {
+          continue;
+        }
+        _this.routines[assertion]();
+        wasRoutine = true;
+        break;
+      }
+      return _results;
+    };
     preActions = function() {
       finder(_assertions, sentencer, function(conf) {
         return _assertions = conf.item.act.call(_this, conf);
       }, true);
       if (typeof _assertions === "string") {
-        return _assertions = [_assertions];
+        _assertions = [_assertions];
       }
+      return runRoutines();
     };
     fail = function(err, params) {
       var errstr;
-      errstr = "Expetation '" + err.source + "' is not met";
+      errstr = "Expectation '" + err.source + "' is not met";
       if (params != null) {
         errstr += " (" + params + ")";
       }
@@ -397,6 +433,9 @@ prolific = (function() {
         preActions();
         for (_i = 0, _len = _assertions.length; _i < _len; _i++) {
           assertion = _assertions[_i];
+          if (!(!wasRoutine)) {
+            continue;
+          }
           matcherObj = finder(assertion, matchers);
           if (matcherObj == null) {
             throw Error("Prolific bad expression '" + assertion + "'");

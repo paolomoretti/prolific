@@ -62,6 +62,24 @@ describe("Prolific", function() {
       return expect(null).toBe(instance.getArguments("null")[0]);
     });
   });
+  describe("Routines", function() {
+    it("should be able to set a routine", function() {
+      prolific.prototype.routines = {
+        "catch me if you can": function() {
+          alert("cought you");
+          return console.log("si");
+        }
+      };
+      return assume("method window.alert is called", function() {
+        return assume("catch me if you can");
+      });
+    });
+    return it("should still have the routine after a test", function() {
+      return assume("method window.alert is called", function() {
+        return assume("catch me if you can");
+      });
+    });
+  });
   describe("assumption matchers", function() {
     describe("matcher 'is greater|lower than'", function() {
       it("should catch 'a is greater than b' assumption", function() {
