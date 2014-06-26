@@ -27,8 +27,7 @@ class prolific
         reg: /(.+) (and) (.+)/
         get: "$1,$3"
         act: (conf)=>
-          for spec in conf.subjects
-            @test spec, @options
+          @test spec, @options for spec in conf.subjects
           []
 
       "waits for":
@@ -57,9 +56,9 @@ class prolific
         act: (conf)->
           if conf.subjects[0].indexOf(".") isnt -1
             _t = conf.subjects[0].split(".")
-            _m = _t.pop()
-            eval "var _o = #{_t.join(".")}"
-            spy = spyOn _o, _m unless jasmine.isSpy _o[_m]
+            _method = _t.pop()
+            eval "var _object = #{_t.join(".")}"
+            spy = spyOn _object, _method unless jasmine.isSpy _object[_method]
           else
             spy = spyOn window, conf.subjects[0] unless jasmine.isSpy window[conf.subjects[0]]
 
@@ -262,7 +261,6 @@ class prolific
       for assertion in _assertions when @routines[assertion]?
         do @routines[assertion]
         wasRoutine = true
-        break
 
     preActions = =>
       finder _assertions, sentencer, (conf)=>
@@ -271,36 +269,33 @@ class prolific
 
       _assertions = [_assertions] if typeof _assertions is "string"
 
-      do runRoutines
-
     fail = (err, params)->
       errstr = "Expectation '#{err.source}' is not met"
       errstr += " (#{params})" if params?
       errstr += " (#{err.item.err(err)})" if err.item.err?
 
-      throw Error errstr if @throwError isnt false
-      return false
+      if @throwError isnt false then throw Error errstr else false
 
     @test = (assumptions, options)->
-      if typeof assumptions isnt "string"
-        runs assumptions
-      else
-        @options = options
-        _assertions = assumptions
+      return runs assumptions if typeof assumptions isnt "string"
 
-        do preActions
+      @options = options
+      _assertions = assumptions
 
-        for assertion in _assertions when not wasRoutine
-          matcherObj = finder assertion, matchers
+      do preActions
+      do runRoutines
 
-          throw Error "Prolific bad expression '#{assertion}'" if not matcherObj?
-          waits timer*1000 if timer > 0
-          if @throwError is true
-            runs =>
-              runMatcher.call @, matcherObj
-          else
-            res = runMatcher.call @, matcherObj
-            if res? then return res else return true
+      for assertion in _assertions when not wasRoutine
+        matcherObj = finder assertion, matchers
+
+        throw Error "Prolific bad expression '#{assertion}'" if not matcherObj?
+        waits timer*1000 if timer > 0
+
+        if @throwError is true
+          runs => runMatcher.call @, matcherObj
+        else
+          res = runMatcher.call @, matcherObj
+          return if res? then res else true
 
     @getArguments = getArguments
     @matchers     = matchers
@@ -308,6 +303,8 @@ class prolific
     @finder       = finder
     @throwError   = throwError
     @fail         = fail
+
+#-----------------------------------------------------------------------------------------------------------------------
 
 beforeEach ->
   window.assume = (assumptions, options)=>

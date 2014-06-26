@@ -74,13 +74,13 @@ prolific = (function() {
         get: "$1",
         "var": "$2,$3,$4,$5",
         act: function(conf) {
-          var methodArgGetter, spy, _args, _exp, _m, _t;
+          var methodArgGetter, spy, _args, _exp, _method, _t;
           if (conf.subjects[0].indexOf(".") !== -1) {
             _t = conf.subjects[0].split(".");
-            _m = _t.pop();
-            eval("var _o = " + (_t.join(".")));
-            if (!jasmine.isSpy(_o[_m])) {
-              spy = spyOn(_o, _m);
+            _method = _t.pop();
+            eval("var _object = " + (_t.join(".")));
+            if (!jasmine.isSpy(_object[_method])) {
+              spy = spyOn(_object, _method);
             }
           } else {
             if (!jasmine.isSpy(window[conf.subjects[0]])) {
@@ -394,8 +394,7 @@ prolific = (function() {
           continue;
         }
         _this.routines[assertion]();
-        wasRoutine = true;
-        break;
+        _results.push(wasRoutine = true);
       }
       return _results;
     };
@@ -404,9 +403,8 @@ prolific = (function() {
         return _assertions = conf.item.act.call(_this, conf);
       }, true);
       if (typeof _assertions === "string") {
-        _assertions = [_assertions];
+        return _assertions = [_assertions];
       }
-      return runRoutines();
     };
     fail = function(err, params) {
       var errstr;
@@ -419,41 +417,42 @@ prolific = (function() {
       }
       if (this.throwError !== false) {
         throw Error(errstr);
+      } else {
+        return false;
       }
-      return false;
     };
     this.test = function(assumptions, options) {
       var assertion, matcherObj, res, _i, _len,
         _this = this;
       if (typeof assumptions !== "string") {
         return runs(assumptions);
-      } else {
-        this.options = options;
-        _assertions = assumptions;
-        preActions();
-        for (_i = 0, _len = _assertions.length; _i < _len; _i++) {
-          assertion = _assertions[_i];
-          if (!(!wasRoutine)) {
-            continue;
-          }
-          matcherObj = finder(assertion, matchers);
-          if (matcherObj == null) {
-            throw Error("Prolific bad expression '" + assertion + "'");
-          }
-          if (timer > 0) {
-            waits(timer * 1000);
-          }
-          if (this.throwError === true) {
-            runs(function() {
-              return runMatcher.call(_this, matcherObj);
-            });
+      }
+      this.options = options;
+      _assertions = assumptions;
+      preActions();
+      runRoutines();
+      for (_i = 0, _len = _assertions.length; _i < _len; _i++) {
+        assertion = _assertions[_i];
+        if (!(!wasRoutine)) {
+          continue;
+        }
+        matcherObj = finder(assertion, matchers);
+        if (matcherObj == null) {
+          throw Error("Prolific bad expression '" + assertion + "'");
+        }
+        if (timer > 0) {
+          waits(timer * 1000);
+        }
+        if (this.throwError === true) {
+          runs(function() {
+            return runMatcher.call(_this, matcherObj);
+          });
+        } else {
+          res = runMatcher.call(this, matcherObj);
+          if (res != null) {
+            return res;
           } else {
-            res = runMatcher.call(this, matcherObj);
-            if (res != null) {
-              return res;
-            } else {
-              return true;
-            }
+            return true;
           }
         }
       }
