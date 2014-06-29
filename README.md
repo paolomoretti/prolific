@@ -3,7 +3,7 @@
 ---
 
 ### Let's talk to Jasmine 
-![alt build status](https://drone.io/github.com/paolomoretti/prolific/status.png)
+![alt build status](https://travis-ci.org/paolomoretti/prolific.svg)
 
 Prolific is a library meant to be used along with Jasmine 1.3.
 
