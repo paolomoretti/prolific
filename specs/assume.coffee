@@ -17,7 +17,7 @@ describe "Prolific assume", ->
 
   it "should be able to test 'is|isnt' assumptions", ->
     assume "whenever is whenever"
-    assume "3 is 3"
+    assume "3 is 33"
     assume "3 isnt '3'"
     assume "(4-1) is 3"
     assume "(3/2) is 1.5"
