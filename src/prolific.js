@@ -386,15 +386,26 @@ prolific = (function() {
       return matcherObj.item.act.call(this, matcherObj);
     };
     runRoutines = function() {
-      var assertion, _i, _len, _results;
+      var assertion, name, routine, routineArgs, _i, _len, _results;
       _results = [];
       for (_i = 0, _len = _assertions.length; _i < _len; _i++) {
         assertion = _assertions[_i];
-        if (!(_this.routines[assertion] != null)) {
-          continue;
-        }
-        _this.routines[assertion]();
-        _results.push(wasRoutine = true);
+        _results.push((function() {
+          var _ref, _results1;
+          _ref = this.routines;
+          _results1 = [];
+          for (name in _ref) {
+            routine = _ref[name];
+            if (assertion.match(new RegExp(name))) {
+              routineArgs = assertion.match(new RegExp(name));
+              wasRoutine = routineArgs.shift();
+              _results1.push(routine.apply(this, routineArgs));
+            } else {
+              _results1.push(void 0);
+            }
+          }
+          return _results1;
+        }).call(_this));
       }
       return _results;
     };
@@ -468,6 +479,8 @@ prolific = (function() {
   return prolific;
 
 })();
+
+window.prolific = prolific;
 
 beforeEach(function() {
   var _this = this;

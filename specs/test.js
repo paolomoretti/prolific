@@ -66,18 +66,24 @@ describe("Prolific", function() {
     it("should be able to set a routine", function() {
       prolific.prototype.routines = {
         "catch me if you can": function() {
-          alert("cought you");
-          return console.log("si");
+          return alert("got you");
         }
       };
       return assume("method window.alert is called", function() {
         return assume("catch me if you can");
       });
     });
-    return it("should still have the routine after a test", function() {
+    it("should still have the routine after a test", function() {
       return assume("method window.alert is called", function() {
         return assume("catch me if you can");
       });
+    });
+    return it("should be able to use regexp to get variables", function() {
+      prolific.prototype.routines["I can get (number|string) from routine name"] = function(varType) {
+        return window.testVarType = varType;
+      };
+      assume("I can get string from routine name");
+      return assume("var testVarType is 'string'");
     });
   });
   describe("assumption matchers", function() {

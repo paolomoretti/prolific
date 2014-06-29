@@ -258,9 +258,13 @@ class prolific
       matcherObj.item.act.call @, matcherObj
 
     runRoutines = =>
-      for assertion in _assertions when @routines[assertion]?
-        do @routines[assertion]
-        wasRoutine = true
+      for assertion in _assertions
+        for name,routine of @routines
+          if assertion.match new RegExp(name)
+            routineArgs = assertion.match new RegExp(name)
+            wasRoutine = routineArgs.shift()
+
+            routine.apply @, routineArgs
 
     preActions = =>
       finder _assertions, sentencer, (conf)=>
@@ -305,6 +309,8 @@ class prolific
     @fail         = fail
 
 #-----------------------------------------------------------------------------------------------------------------------
+
+window.prolific = prolific
 
 beforeEach ->
   window.assume = (assumptions, options)=>

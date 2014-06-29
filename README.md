@@ -38,7 +38,7 @@ Every test is ran using *assume* method, which is used to define one or more **s
 
 * **SENTENCE** A sentence is made with 1 or more matchers and some optional variables
 * **MATCHERS** are used within a sentence and define the type of comparison/test you want to execute
-* **GETTERS** are used within matchers to catch the type of arguments used within a matcher
+* **GETTERS** are used to catch the type of arguments used within a matcher. 
 
 Let's take as example this "assumption"
 
@@ -47,9 +47,180 @@ Let's take as example this "assumption"
 - **on click .classname then var a is (var total - 1)** is the sentence
 - **on \<event name> \<jquery expression> then \<new sentence>** is the matcher (of type event)
 - **var \<var_name>** and **(\<javascript math code>)** are the getters
+
+
+To make testing more fun, Prolific provides some usefull helpers: 
+
+- **ROUTINES** are used to define a piece of code you can call whenever you like, without having to write it tons of times
+
  
+--- 
+###Getters 
+Getters are used within a sentence and they identify the type of argument we are testing.
+
+- **VARIABLE**
+
+  *Usage:* `var variableName`
+  
+  *Catch:* `variableName` (variable)
+  
+  *Example:* `assume "var foo isnt undefined"`
+  
+  Please remember that variables are always within ```window``` scope and not on jasmine suite scope.
+  
+  Prolific evaluates the content after *var*, that means you can do:
+  
+  `var $('body').find('.classname').size()`
+  
+- **STRINGS**
+
+  *Usage:* `'string value'`
+
+  *Catch:* `stringvalue` (string)
+  
+  *Example:* ```assume "'person name' isnt 'person surname'"```
+
+
+- **NUMBERS**
+
+  *Usage:* `123`
+
+  *Catch:* `123` (number)
+  
+  *Example:* ```assume "var variableName is 123"```
+
+
+- **OPERATIONS**
+
+  *Usage:* `(4*2-2)`
+
+  *Catch:* `6` (number)
+  
+  Since it's evaluated, you can also use variables or functions
+  
+  *Example:* ```assume "var variableName is (foo/bar()+2)"```
+
+
+- **DOM ELEMENTS**
+
+  *Usage:* `$ .classname:not(.visible)`, `$('.classname:not(.visible)')`
+
+  *Catch:* DOM element with class 'classname' that is not visible
+  
+  *Example:* ```assume "$ .classname is an element"```
+
+
+
 ---
-### Sentence
+### Matchers
+A sentence is generally made out of a matcher, or more then one if a variable *and* is used
+``` assume "{matcher}" ```
+
+###### List of possible matchers
+
+- **EQUALITY**
+  
+  *Usage:* ``` assume "4 is 5" ```, ``` assume "var a isnt 'string value'" ``` You just have to use **\<getter> is / isnt \<getter>**
+  
+  If you dont't want to test the type (==), you can use:
+  
+  `assume "3 is equal to 3"`
+
+- **GREATER / LOWER**
+  
+  *Usage:* 
+  `assume "4 is greater then 3"`,
+  `assume "3 is lower then 5"`,
+  `assume "5 is > then 3"`
+
+- **METHOD SPY**
+
+  *Usage:* 
+  
+  ``` 
+  #Method foo.bar is spyed and the real method is not called
+  
+  assume "method foo.bar is called", (arguments)->
+  	foo.bar()
+  ```
+  
+  ```
+  #Original method foo.bar is called (same as .andCallThrough())
+  
+  assume "method foo.bar() is called", (arguments)->
+  	foo.bar()
+  ```
+  
+  ```
+  #Method foo.bar is spyed and the argument is checked
+  
+  assume "method foo.bar is called with 'argument'", ->
+  	foo.bar('argument')
+  ``` 
+  
+  ```
+  #Check how many times the method has been called
+  
+  assume "method foo.bar is called 3 times", ->
+  	foo.bar()
+  	foo.bar()
+  	foo.bar()	
+  ``` 
+  
+- **METHOD MOCK AND RETURN**
+
+  *Usage:* 
+  
+  ``` 
+  #Mock jQuery.ajax method and return a custom value
+  
+  assume "method jQuery.ajax is mocked", (params)->
+  	do param.success
+   ``` 
+   
+- **METHOD THROW**
+
+  *Usage:* 
+
+  ```
+  assume "method foo.invalid throws error", ->
+  	foo.invalid()
+  ```
+  
+  ```
+  assume "method foo.valid doesn't throw error", ->
+  	foo.valid()
+  ```
+  
+- **ON EVENT**
+
+  *Usage:* 
+  
+  ```
+  assume "on click .classname then var foo is 5"
+  ``` 
+  
+  *Structure:* on {event_name} {jquery expression} then {sentence}
+  
+  Because the last variable is a **sentence**, you can use a more complex assumption (see sentences below), as:
+  
+  ``` assume "on click .classname then in 2 seconds method foo.bar is called with 'string value'" ```
+  
+
+- **IS A DOM ELEMENT**
+
+  *Usage:* 
+  
+  `assume "$ .classname .childclassname is an element"`, 
+  `assume "$ .invalidclassname isnt an element"`, 
+  `assume "var getElementMethod() is an element"`
+  
+    
+
+
+
+---
+###Sentence
 Typically, a sentence follows this structure: {subject 1} {comparator} {subjects 2}
 ``` assume "5 is 5" ```
 
@@ -70,65 +241,63 @@ A sentence has a list of possible additional variables:
 
 **IMPORTANT** Those variable can be used just a single time per sentence
 
----
-### Matchers
-A sentence is generally made out of a matcher, or more then one if a variable *and* is used
-``` assume "{matcher}" ```
-
-###### List of possible matchers
-
-- **equality**
-  
-  ``` assume "4 is 5" ```, ``` assume "var a isnt 'string value'" ``` You just have to use **\<getter> is \<getter>** or isnt
-
-- **Method spy**
-
-  ``` assume "method foo.bar is called" ``` Method foo.bar is then spyed and the real method is not called
-  
-  ``` assume "method foo.bar() is called" ``` The method is also called (same as .andCallThrough())
-  
-  ``` assume "method foo.bar is called with 'argument'" ``` Method foo.bar is spyed and the argument is checked
-  
-  ``` assume "method foo.bar is called 3 times" ``` Check how many times the method has been called
-  
-- **Method mock**
-
-  ``` 
-  assume "method jQuery.ajax is mock", (params)->
-  	do param.success
-   ``` 
-   Mocking a method creates a spy on it
-   
-- **Method throws**
-
-  ``` assume "method foo.invalid throws error" ```  
-  ``` assume "method foo.valid doesn't throws error" ```
-  
-- **assign value** (use with caution)
-  
-  ``` assume "set var foo with value 4" ``` Same as windows.foo = 4
-  
-  *var foo* is a getter, ie a particular expression that is interpretated. See below for the list of possible   **getters**
-  
-  ``` assume "set $('.foo') with css margin-top 4px" ``` In this case the *getter* is a jquery element, so .css() jquery function is called with 2 parameters.
-  
-  You can use all jquery element method using a jquery *getter*
-  
-- **on event**
-
-  ``` assume "on click .classname then var foo is 5" ``` 
-  
-  Structure: on {event_name} {jquery expression} then {sentence}
-  
-  Because the last variable is a **sentence**, you can use a more complex assumption, as:
-  
-  ``` assume "on click .classname then in 2 seconds method foo.bar is called with 'string value'" ```
-  
 
 ---
+###Helpers
+
+- **ROUTINES**
+
+  *Usage:* To use a routine you have to add it to the routines prototype:
+  
+  ```
+  prolific::routines["Restart my app with a logged in user"] = ->
+  	myapp.regions.close()
+  	myapp.reset()
+  	myapp.logout()
+  	myapp.setUser 
+  		name: "Paolo"
+  		email: ""address@domain.com"" 	
+  ```
+  
+  You can define a new routine in a separate file included after prolific or in a specific test suite file. 
+  Remember that is added to prolific prototype routines property, so it will be usable for the entire test session.
+  
+  Once you've defined it, you can use the routine within your test:
+  
+  ```
+  it "should have a logged user", ->
+  	assume "Restart my app with a logged in user"
+  	
+  	assume "var myapp.currentUser.name is 'Paolo'"
+  ```
+  
+  Since the routine name is a **regular expression** you can pass variable to run a custom function:
+  
+  ```
+  prolific::routines["user (username),(email) (is|isnt) logged in"] = (username, email, logged)->
+  	myapp.reset()
+  	if logged is 'is'
+  		myapp.setUser
+  			name: username
+  			email: email  		  		
+  ```
+  
+  Then again you can test your app:
+  
+  ```
+  assume "user paolo,address@domain.com is logged in"
+  assume "var myapp.currentUser.name is 'paolo'"
+  
+  assume "user paolo,address@domain.com isnt logged in"
+  assume "var myapp.currentUser is undefined"
+  ```
+
+
+
+
 ---
 ### Testing examples
-```coffeescript
+```
 describe "is|isnt comparator", ->
 
     it "should compare 2 numbers", ->
