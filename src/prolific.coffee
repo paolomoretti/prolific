@@ -1,5 +1,6 @@
 # Bootstrap
 throw Error "Prolific must be included after jasmine js file" if not beforeEach?
+throw Error "Prolific doesn't support Jasmine version >= 2.0.0" if jasmine.version.major > 1
 console.warn "Prolific needs jQuery to test DOM elements" if not jQuery?
 
 ###
