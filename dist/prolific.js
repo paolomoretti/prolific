@@ -410,8 +410,10 @@ prolific = (function() {
     };
     preActions = function() {
       finder(_assertions, sentencer, function(conf) {
-        return _assertions = conf.item.act.call(_this, conf);
-      }, true);
+        if (conf != null) {
+          return _assertions = conf.item.act.call(_this, conf);
+        }
+      });
       if (typeof _assertions === "string") {
         return _assertions = [_assertions];
       }

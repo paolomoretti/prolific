@@ -27,7 +27,7 @@ class prolific
         reg: /(.+) (and) (.+)/
         get: "$1,$3"
         act: (conf)=>
-          @test spec, @options for spec in conf.subjects
+          @test(spec, @options) for spec in conf.subjects
           []
 
       "waits for":
@@ -268,8 +268,7 @@ class prolific
 
     preActions = =>
       finder _assertions, sentencer, (conf)=>
-        _assertions = conf.item.act.call @, conf
-      , true
+        _assertions = conf.item.act.call @, conf if conf?
 
       _assertions = [_assertions] if typeof _assertions is "string"
 

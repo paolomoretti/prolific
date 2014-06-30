@@ -176,3 +176,6 @@ describe "Prolific assume", ->
 
     assume "within 1 seconds var a is 1"
     assume "var b is 2"
+
+  it "should catch this assumption", ->
+    assume "in 1 seconds $ .no-sources-message isnt an element and $ :contains(This collection will display content from) isnt an element"

@@ -162,7 +162,7 @@ describe("Prolific assume", function() {
       return $(".assignclass").remove();
     });
   });
-  return it("should be able to wait for a condition before testing", function() {
+  it("should be able to wait for a condition before testing", function() {
     var x;
     a = b = 0;
     x = function() {
@@ -174,6 +174,9 @@ describe("Prolific assume", function() {
     }, 1000);
     assume("within 1 seconds var a is 1");
     return assume("var b is 2");
+  });
+  return it("should catch this assumption", function() {
+    return assume("in 1 seconds $ .no-sources-message isnt an element and $ :contains(This collection will display content from) isnt an element");
   });
 });
 
