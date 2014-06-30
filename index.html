@@ -1,1 +1,98 @@
-There will be **prolific** page here!
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Prolific</title>
+    <link rel="shortcut icon" type="image/x-icon" href="assets/favicon.ico"/>
+    <link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="assets/common.css"/>
+    <link rel="stylesheet" href="assets/pretty.css"/>
+    <script type="text/javascript" src="assets/coffee-script.js"></script>
+    <script src="assets/jquery.js" type="text/javascript"></script>
+    <script src="assets/prettify.js" type="text/javascript"></script>
+    <script src="assets/common.js" type="text/javascript"></script>
+</head>
+<body>
+<div class="header">
+    <a href="/prolific/" class="logo">
+        <span>Prolific</span>
+    </a>
+    <span class="counter">0</span>
+</div>
+
+<section class="intro">
+    <h2>let’s talk to jasmine!</h2>
+    <h3>Prolific is a library to extend jasmine testing framework. <br/>
+        If you are bored by writing classic jasmine test code, than have a look below!</h3>
+</section>
+
+<section class="content">
+    <h4>Installation</h4>
+    <p>In order to use Prolific you only need to include prolific js/coffee file right after jasmine js file.
+        This is enough to let you use “assume” prolific method to talk to Jasmine and let Prolific do the dirty
+        job for you.</p>
+
+    <h4>How it works</h4>
+    <p>Prolific, through it’s “assume” method, let you use sentences to test and execute your code, exposing
+        every Jasmine test methods for you in an understanding way.
+        Imaging to write documentation instead of testing code. Fun, isn’t it?</p>
+
+    <h4>OK, give me an example!</h4>
+
+    <p>Please have a look at <a href="https://github.com/paolomoretti/prolific" target="_blank">GitHub</a> to understand more about Prolific.<br>Below are few examples of what you can do with Prolific.</p>
+    <pre class="prettyprint">
+describe "Jasmine classic VS Prolific library", ->
+
+  it "should compare two numbers", ->
+    expect(4).toBe 4
+    expect(testNumber).not.toBe (8/3)
+
+    assume "4 is 4 and var testNumber isnt (8/3)"
+
+  it "should check elements", ->
+    expect($(".classname").size()).toBeGreaterThan 0
+    assume "$ .classname is an element"
+
+  it "should check strings", ->
+    expect(testString).toBe "foo"
+    assume "var testString is 'foo'"
+
+  it "should wait and test a method", ->
+    spyOn foo, "bar"
+    waits 2000
+    runs ->
+      do foo.bar
+      expect(foo.bar).toHaveBeenCalled()
+
+    assume "in 2 seconds method foo.bar is called", ->
+      do foo.bar
+
+  it "should click an element and check a condition", ->
+    do $(".classname").click
+    waits 3000
+    runs ->
+      expect($(".classname").attr("name")).toBe "val"
+
+    assume "on click .classname then in 3 seconds $ .classname is [name=val]"
+
+    </pre>
+    <br/>
+
+    <h4>I want a new custom matcher</h4>
+    <p>I'm keep on working to improve Prolific and maintain retro-compatibility, but if you think something juicy is missing, just let me know and I'll try to put it on the next release.</p>
+
+    <h4>Who are you?</h4>
+    <p>I'm Paolo Moretti, devoted developer since 1998. If you want to ask me something or to request a new feature for Prolific, just drop me an email at littlebrown@gmail.com</p>
+
+    <h4>Ok, now give me Prolific</h4>
+    <a class="button" href="https://github.com/paolomoretti/prolific/archive/master.zip">Download</a>
+
+</section>
+
+<script type="text/coffeescript">
+$.get "http://www.bitterbrown.com/prolific/countme.php?getcount", (count)->
+    $(".counter").html "Used #{count} times in test suites <img src='https://travis-ci.org/paolomoretti/prolific.svg'>"
+</script>
+
+</body>
+</html>

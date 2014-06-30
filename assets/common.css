@@ -1,0 +1,168 @@
+@font-face {
+  font-family: Mohave;
+  src: url(Mohave-Bold.otf);
+}
+body {
+  margin: 0;
+  padding: 0 0 100px 0;
+  background-color: #c9c8c8;
+}
+body a {
+  color: #00826c;
+}
+body a:hover {
+  color: #ee442f;
+}
+body .header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  border-top: 8px solid #00b597;
+  background-color: #2d2f3d;
+  padding: 25px 25px 0 25px;
+}
+body .header .logo {
+  display: inline-block;
+  width: 209px;
+  height: 70px;
+  background: url(logo.png) no-repeat left top;
+  margin-bottom: -13px;
+}
+body .header .logo span {
+  display: none;
+}
+body .header .counter {
+  color: #fff;
+  position: fixed;
+  top: 69px;
+  right: 30px;
+  font-family: 'Mohave';
+}
+body .intro {
+  border-top: 130px solid #2d2f3d;
+  padding: 70px 120px;
+  text-align: center;
+  background-color: #f26e5e;
+}
+body .intro h2 {
+  font-size: 3em;
+  font-family: 'Mohave';
+  color: #2a2a2a;
+  margin: 0 0 45px 0;
+}
+body .intro h3 {
+  font-size: 1.3em;
+  font-family: 'PT Sans';
+  font-weight: 300;
+  color: #2a2a2a;
+  margin: 0;
+}
+body .content {
+  padding: 25px 120px;
+}
+body .content h4 {
+  color: #2a2a2a;
+  font-size: 1.55em;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-family: 'PT Sans';
+  margin: 10px 0;
+}
+body .content h5 {
+  color: #2a2a2a;
+  font-size: 1.1em;
+  font-weight: 400;
+  font-family: 'PT Sans';
+  margin: 10px 0 0 0;
+}
+body .content h5.code-label {
+  background-color: #f26e5e;
+  font-size: 15px;
+  margin: 0 0 -14px 0;
+  padding: 2px 8px;
+  display: inline-block;
+}
+body .content pre {
+  margin: 2px 0;
+}
+body .content p {
+  color: #2a2a2a;
+  font-size: 18px;
+  font-weight: 300;
+  font-family: 'PT Sans';
+  margin: 0 0 45px 0;
+}
+.splitter:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+.splitter > div {
+  box-sizing: border-box;
+  float: left;
+  width: 50%;
+}
+.splitter > div:first-child {
+  padding-right: 5px;
+}
+.splitter > div:last-child {
+  padding-left: 5px;
+}
+.button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #00b597;
+  color: #2a2a2a;
+  font-size: 22px;
+  border: 0;
+  border-bottom: 5px solid #00826c;
+  font-family: 'Mohave';
+  text-decoration: none;
+}
+.button:hover {
+  -webkit-transition: all, 200ms;
+  -moz-transition: all, 200ms;
+  -o-transition: all, 200ms;
+  transition: all, 200ms;
+  background-color: #f26e5e;
+  color: #fff;
+  border-bottom-color: #ee442f;
+}
+@media (max-width: 700px) {
+  body .intro {
+    padding-right: 40px;
+    padding-left: 40px;
+  }
+  body .content {
+    padding: 25px 40px;
+  }
+  body .content pre {
+    width: 100%;
+    overflow: auto;
+    box-sizing: border-box;
+  }
+}
+@media (max-width: 500px) {
+  body .header .counter {
+    font-size: 13px;
+    top: 20px;
+    right: 11px;
+  }
+  body .intro {
+    padding: 20px;
+    font-size: .8em;
+  }
+  body .intro h2 {
+    margin-bottom: 25px;
+  }
+  body .content {
+    padding: 20px;
+    font-size: .8em;
+  }
+  body .content pre {
+    width: 100%;
+    overflow: auto;
+    box-sizing: border-box;
+  }
+}
