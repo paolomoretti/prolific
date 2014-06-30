@@ -3,7 +3,7 @@ var a, b, c, foo, testNoThrow, testThrow, testfalse, testme, testnull;
 testme = testnull = testfalse = foo = a = b = c = testThrow = testNoThrow = null;
 
 describe("Prolific assume", function() {
-  it("should expose an assume method", function() {
+  it("should expose a global assume method", function() {
     return expect(assume).toBeDefined();
   });
   it("should throw error if bad prolifc expression", function() {
@@ -22,7 +22,7 @@ describe("Prolific assume", function() {
     assume("3 isnt '3'");
     assume("(4-1) is 3");
     assume("(3/2) is 1.5");
-    assume("(4-2) isnt 4");
+    assume("(4-2) isnt 5");
     assume("whenever isnt blabla");
     assume("true isnt 1");
     assume("true is true");

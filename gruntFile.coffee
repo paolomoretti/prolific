@@ -18,14 +18,14 @@ module.exports = (grunt) ->
 
       jasmine:
         files: [ "specs/*.coffee" ]
-        tasks: ["coffee:compileJasmine"]
+        tasks: ["coffee:compileJasmine","jasmine:pivotal:build"]
 
     coffee:
       compileProlific:
         options:
           bare: true
         files:
-          "dist/prolific.js": ["dependencies/src/prolific.coffee"]
+          "dist/prolific.js": ["src/prolific.coffee"]
 
       compileJasmine:
         options:

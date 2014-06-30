@@ -3,7 +3,7 @@
 ---
 
 ### Let's talk to Jasmine 
-![alt build status](https://travis-ci.org/paolomoretti/prolific.svg)
+![alt build status](https://travis-ci.org/Bitterbrown/prolific.svg)
 
 Prolific is a library meant to be used along with Jasmine 1.3.
 
@@ -20,6 +20,8 @@ It requires **jquery** to process elements and it accepts jquery expressions for
 - **Prolific**.js has to be included after jasmine.js library.
 - **Prolific** has to be used within an *it* statement.
 - **Prolific** needs jQuery to test elements.
+
+You can install Prolific using bower: `bower install Prolific --save`
 
 It works around assumptions using the function ```assume()```
 
