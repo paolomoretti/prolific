@@ -13,7 +13,7 @@ module.exports = (grunt) ->
 
     watch:
       coffeescript:
-        files: [ "assets/src/*.coffee" ]
+        files: [ "src/*.coffee" ]
         tasks: ["coffee:compileProlific", "uglify:dev"]
 
       jasmine:
@@ -25,7 +25,7 @@ module.exports = (grunt) ->
         options:
           bare: true
         files:
-          "dist/prolific.js": ["assets/src/prolific.coffee"]
+          "dist/prolific.js": ["dependencies/src/prolific.coffee"]
 
       compileJasmine:
         options:
@@ -44,7 +44,7 @@ module.exports = (grunt) ->
         options:
           specs: 'specs/specs.js'
           summary: true
-          vendor: 'assets/libs/jquery-1.9.1.min.js'
+          vendor: 'dependencies/jquery-1.9.1.min.js'
           version: '1.3.1'
           display: 'full'
           keepRunner: true

@@ -22,7 +22,7 @@ describe("Prolific assume", function() {
     assume("3 isnt '3'");
     assume("(4-1) is 3");
     assume("(3/2) is 1.5");
-    assume("(4-2) isnt 3");
+    assume("(4-2) isnt 4");
     assume("whenever isnt blabla");
     assume("true isnt 1");
     assume("true is true");
