@@ -380,6 +380,14 @@ describe("Prolific Routines", function() {
       return assume("catch me if you can");
     });
   });
+  it("should have a routine with sentence variable and still catch it", function() {
+    prolific.prototype.routines["open first folder and select first source in expanded group"] = function() {
+      return console.log("we are here");
+    };
+    return assume("method console.log() is called with 'we are here'", function() {
+      return assume("open first folder and select first source in expanded group");
+    });
+  });
   it("should still have the routine after a test", function() {
     return assume("method window.alert is called", function() {
       return assume("catch me if you can");

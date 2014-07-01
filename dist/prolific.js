@@ -4,6 +4,10 @@ if (typeof beforeEach === "undefined" || beforeEach === null) {
   throw Error("Prolific must be included after jasmine js file");
 }
 
+if ((typeof jasmine !== "undefined" && jasmine !== null) && (jasmine.version != null) && jasmine.version.major > 1) {
+  throw Error("Prolific doesn't support Jasmine version >= 2.0.0");
+}
+
 if (typeof jQuery === "undefined" || jQuery === null) {
   console.warn("Prolific needs jQuery to test DOM elements");
 }
@@ -385,16 +389,17 @@ prolific = (function() {
       return matcherObj.item.act.call(this, matcherObj);
     };
     runRoutines = function() {
-      var assertion, name, routine, routineArgs, _i, _len, _results;
+      var assertion, name, routine, routineArgs, _i, _len, _ref, _results;
+      _ref = [_assertions];
       _results = [];
-      for (_i = 0, _len = _assertions.length; _i < _len; _i++) {
-        assertion = _assertions[_i];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        assertion = _ref[_i];
         _results.push((function() {
-          var _ref, _results1;
-          _ref = this.routines;
+          var _ref1, _results1;
+          _ref1 = this.routines;
           _results1 = [];
-          for (name in _ref) {
-            routine = _ref[name];
+          for (name in _ref1) {
+            routine = _ref1[name];
             if (assertion.match(new RegExp(name))) {
               routineArgs = assertion.match(new RegExp(name));
               wasRoutine = routineArgs.shift();
@@ -441,8 +446,10 @@ prolific = (function() {
       }
       this.options = options;
       _assertions = assumptions;
-      preActions();
       runRoutines();
+      if (!wasRoutine) {
+        preActions();
+      }
       for (_i = 0, _len = _assertions.length; _i < _len; _i++) {
         assertion = _assertions[_i];
         if (!(!wasRoutine)) {

@@ -1,6 +1,6 @@
 # Bootstrap
 throw Error "Prolific must be included after jasmine js file" if not beforeEach?
-throw Error "Prolific doesn't support Jasmine version >= 2.0.0" if jasmine.version.major > 1
+throw Error "Prolific doesn't support Jasmine version >= 2.0.0" if jasmine? and jasmine.version? and jasmine.version.major > 1
 console.warn "Prolific needs jQuery to test DOM elements" if not jQuery?
 
 ###
@@ -259,7 +259,7 @@ class prolific
       matcherObj.item.act.call @, matcherObj
 
     runRoutines = =>
-      for assertion in _assertions
+      for assertion in [_assertions]
         for name,routine of @routines
           if assertion.match new RegExp(name)
             routineArgs = assertion.match new RegExp(name)
@@ -286,8 +286,8 @@ class prolific
       @options = options
       _assertions = assumptions
 
-      do preActions
       do runRoutines
+      do preActions unless wasRoutine
 
       for assertion in _assertions when not wasRoutine
         matcherObj = finder assertion, matchers
