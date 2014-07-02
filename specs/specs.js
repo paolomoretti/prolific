@@ -150,18 +150,6 @@ describe("Prolific assume", function() {
     }));
     return assume("on click #testEventDelayed then in 1 seconds var c is 'clicked delayed'");
   });
-  it("should be able to assign a value", function() {
-    assume("set var x with value 8 and var x is 8");
-    assume("set var x with value '8' and var x is '8'");
-    $("body").prepend($("<input class='assignclass'/>"));
-    assume("set $ .assignclass with attr name = 'my name'");
-    assume("$ .assignclass is [name='my name']");
-    assume("set $ .assignclass with val = var x and var $('.assignclass').val() is '8'");
-    assume("on focus .assignclass then set $ .assignclass with css border = '1px solid red'");
-    return runs(function() {
-      return $(".assignclass").remove();
-    });
-  });
   it("should be able to wait for a condition before testing", function() {
     var x;
     a = b = 0;

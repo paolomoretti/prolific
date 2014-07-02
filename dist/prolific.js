@@ -156,23 +156,6 @@ prolific = (function() {
           }
         }
       },
-      "assign value": {
-        reg: /^set (.+) with (\w+) ([^ ]+)( = | |)(.+|)$/,
-        get: "$1,$3,$5",
-        "var": "$2,$3,$4,$5",
-        act: function(conf) {
-          var _ref;
-          if (schema[0].name === "var" && conf.vars[0] === "value") {
-            return eval("window." + schema[0].subjects[0] + " = " + conf.subjects[1]);
-          } else if ((_ref = schema[0].name) === "jquery" || _ref === "jqueryshort") {
-            if (conf.vars[1] === "=") {
-              return args[0][conf.vars[0]](args[2]);
-            } else {
-              return args[0][conf.vars[0]](conf.vars[1], args[2]);
-            }
-          }
-        }
-      },
       "on event": {
         reg: /^on ([a-z]+) (.+) then (.+)$/,
         get: "$3",
@@ -506,7 +489,6 @@ prolific = (function() {
 window.prolific = prolific;
 
 beforeEach(function() {
-  var _this = this;
   return window.assume = function(assumptions, options) {
     return new prolific().test(assumptions, options);
   };

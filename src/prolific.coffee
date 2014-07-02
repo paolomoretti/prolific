@@ -47,7 +47,7 @@ class prolific
         reg: /^(in|after) ([\d.]+) seconds (.+)$/
         get: "$2,$3"
         var: "$1"
-        act: (conf)=>
+        act: (conf)->
           if conf.vars[0] in ["in","after"]
             timer = parseFloat conf.subjects[0], 10
             _assertions = conf.subjects[1]
@@ -97,23 +97,23 @@ class prolific
         reg: /^method ([A-Za-z.]+) (throws|doesn't throw) error$/
         get: "$1"
         var: "$2"
-        act: (conf)=>
+        act: (conf)->
           eval "var _m = #{conf.subjects[0]}"
           if conf.vars[0] is "throws" then expect(eval conf.subjects[0]).toThrow() else expect(eval conf.subjects[0]).not.toThrow()
 
-    #TODO: unstable, maybe better to remove it
-      "assign value":
-        reg: /^set (.+) with (\w+) ([^ ]+)( = | |)(.+|)$/
-        get: "$1,$3,$5"
-        var: "$2,$3,$4,$5"
-        act: (conf)->
-          if schema[0].name is "var" and conf.vars[0] is "value"
-            eval "window.#{schema[0].subjects[0]} = #{conf.subjects[1]}" # window variables
-          else if schema[0].name in ["jquery", "jqueryshort"]
-            if conf.vars[1] is "="
-              args[0][conf.vars[0]](args[2]) # methods with single value (ex: val)
-            else
-              args[0][conf.vars[0]](conf.vars[1],args[2]) # methods with 2 values (ex: attr)
+      #TODO: unstable, maybe better to remove this
+#      "assign value":
+#        reg: /^set (.+) with (\w+) ([^ ]+)( = | |)(.+|)$/
+#        get: "$1,$3,$5"
+#        var: "$2,$3,$4,$5"
+#        act: (conf)->
+#          if schema[0].name is "var" and conf.vars[0] is "value"
+#            eval "window.#{schema[0].subjects[0]} = #{conf.subjects[1]}" # window variables
+#        F  else if schema[0].name in ["jquery", "jqueryshort"]
+#            if conf.vars[1] is "="
+#              args[0][conf.vars[0]](args[2]) # methods with single value (ex: val)
+#            else
+#              args[0][conf.vars[0]](conf.vars[1],args[2]) # methods with 2 values (ex: attr)
 
       "on event":
         reg: /^on ([a-z]+) (.+) then (.+)$/
@@ -316,5 +316,5 @@ class prolific
 window.prolific = prolific
 
 beforeEach ->
-  window.assume = (assumptions, options)=>
+  window.assume = (assumptions, options)->
     new prolific().test assumptions, options

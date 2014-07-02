@@ -38,6 +38,9 @@ module.exports = (grunt) ->
         files:
           'dist/prolific.min.js': ['dist/prolific.js']
 
+    coffeelint:
+      app: ['src/prolific.coffee']
+
     jasmine:
       pivotal:
         src: 'dist/prolific.js'
@@ -53,8 +56,9 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks "grunt-contrib-watch"
   grunt.loadNpmTasks "grunt-contrib-coffee"
   grunt.loadNpmTasks "grunt-concurrent"
+  grunt.loadNpmTasks "grunt-coffeelint"
 
-  grunt.loadNpmTasks "grunt-contrib-jasmine";
+  grunt.loadNpmTasks "grunt-contrib-jasmine"
 
 
   # DEVELOPMENT tasks --------------------------------------------------------------------------------------------------
