@@ -249,7 +249,7 @@ A sentence has a list of possible additional variables:
 
 - **ROUTINES**
 
-  *Usage:* To use a routine you have to add it to the routines prototype:
+  *Usage:* To use a routine you can either add it to the routines prototype or use a method:
   
   ```
   prolific::routines["Restart my app with a logged in user"] = ->
@@ -259,6 +259,18 @@ A sentence has a list of possible additional variables:
   	myapp.setUser 
   		name: "Paolo"
   		email: ""address@domain.com"" 	
+  		
+  # Add single routine using method
+  prolific::add_routines "set user name to (.+)", (name)->
+  	myapp.currentUser.name = name
+  	
+  # Add multiple routine using method
+  prolific::add_routines 
+  	"set user name to (.+)": (name)->
+  		myapp.currentUser.name = name
+  		
+   	"set user surname to (.+)": (surname)->
+  		myapp.currentUser.surname = surname
   ```
   
   You can define a new routine in a separate file included after prolific or in a specific test suite file. 

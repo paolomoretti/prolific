@@ -393,11 +393,35 @@ describe("Prolific Routines", function() {
       return assume("catch me if you can");
     });
   });
-  return it("should be able to use regexp to get variables", function() {
+  it("should be able to use regexp to get variables", function() {
     prolific.prototype.routines["I can get (number|string) from routine name"] = function(varType) {
       return window.testVarType = varType;
     };
     assume("I can get string from routine name");
     return assume("var testVarType is 'string'");
+  });
+  return describe("method to add single or multiple routines", function() {
+    it("should be able to add a single routine", function() {
+      prolific.prototype.add_routines("this is my single test routine", function(args) {
+        return console.log("single test routine executed");
+      });
+      return assume("method console.log is called with 'single test routine executed'", function() {
+        return assume("this is my single test routine");
+      });
+    });
+    return it("should be able to add array of routines", function() {
+      prolific.prototype.add_routines({
+        "this is first test routine": function(args) {
+          return console.log("first test routine executed");
+        },
+        "this is second test routine": function(args) {
+          return console.log("second test routine executed");
+        }
+      });
+      return assume("method console.log is called 2 times", function() {
+        assume("this is first test routine");
+        return assume("this is second test routine");
+      });
+    });
   });
 });

@@ -25,3 +25,25 @@ describe "Prolific Routines", ->
 
     assume "I can get string from routine name"
     assume "var testVarType is 'string'"
+
+
+  describe "method to add single or multiple routines", ->
+
+    it "should be able to add a single routine", ->
+      prolific::add_routines "this is my single test routine", (args)->
+        console.log "single test routine executed"
+
+      assume "method console.log is called with 'single test routine executed'", ->
+        assume "this is my single test routine"
+
+    it "should be able to add array of routines", ->
+      prolific::add_routines
+        "this is first test routine": (args)->
+          console.log "first test routine executed"
+
+        "this is second test routine": (args)->
+          console.log "second test routine executed"
+
+      assume "method console.log is called 2 times", ->
+        assume "this is first test routine"
+        assume "this is second test routine"

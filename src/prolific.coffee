@@ -14,6 +14,9 @@ $.ajax "http://www.bitterbrown.com/prolific/countme.php"
 class prolific
 
   routines: {}
+  add_routines: ->
+    if arguments.length is 2 then @routines[arguments[0]] = arguments[1] else @routines[name] = routine for name,routine of arguments[0]
+
 
   constructor: (hard)->
     _assertions = null

@@ -25,6 +25,21 @@ $.ajax("http://www.bitterbrown.com/prolific/countme.php");
 prolific = (function() {
   prolific.prototype.routines = {};
 
+  prolific.prototype.add_routines = function() {
+    var name, routine, _ref, _results;
+    if (arguments.length === 2) {
+      return this.routines[arguments[0]] = arguments[1];
+    } else {
+      _ref = arguments[0];
+      _results = [];
+      for (name in _ref) {
+        routine = _ref[name];
+        _results.push(this.routines[name] = routine);
+      }
+      return _results;
+    }
+  };
+
   function prolific(hard) {
     var args, fail, finder, getArguments, getters, matchers, preActions, runMatcher, runRoutines, schema, sentencer, throwError, timer, wasRoutine, _assertions,
       _this = this;
