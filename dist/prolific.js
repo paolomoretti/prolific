@@ -23,6 +23,8 @@ Anyway, if you don't want the call, just remove the line :(
 $.ajax("http://www.bitterbrown.com/prolific/countme.php");
 
 prolific = (function() {
+  prolific.prototype.customMatchers = {};
+
   prolific.prototype.routines = {};
 
   prolific.prototype.add_routines = function() {
@@ -229,7 +231,7 @@ prolific = (function() {
         }
       },
       "is|isnt": {
-        reg: /(.+) (is|isnt) (?!(greater than|lower than|called))(.+)/,
+        reg: /^(.+) (is|isnt) (?!(greater than|lower than|called))(.+)/,
         get: "$1,$4",
         "var": "$2",
         err: function(conf) {
@@ -453,7 +455,10 @@ prolific = (function() {
         if (!(!wasRoutine)) {
           continue;
         }
-        matcherObj = finder(assertion, matchers);
+        matcherObj = finder(assertion, this.customMatchers);
+        if (matcherObj == null) {
+          matcherObj = finder(assertion, matchers);
+        }
         if (matcherObj == null) {
           throw Error("Prolific bad expression '" + assertion + "'");
         }

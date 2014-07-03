@@ -218,8 +218,27 @@ A sentence is generally made out of a matcher, or more then one if a variable *a
   `assume "var getElementMethod() is an element"`
   
     
+####Add custom matcher
 
+I you have a particular need, you can add a custom matcher:
 
+```
+prolific::customMatchers["a divisible by"] =
+	#regular expression to get the match
+	reg: /^(.+) is divisible by (.+)$/  
+	
+	#getter (see list above). Separete them with , if more then 1 
+    get: "$1,$2"
+    
+    #function to run your test. Must call @fail when condition is not met
+    act: (conf)->
+      @fail conf, "Module should be 0, but is #{conf.subjects[0]%subjects[1]}" if conf.subjects[0]%subjects[1] isnt 0
+
+```
+
+You can then test as usual: 
+
+`assume "4 is divisible by 2"` or `assume "var $('.classname').size() is divisible by var myDivisor"`
 
 ---
 ###Sentence

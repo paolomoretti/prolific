@@ -13,6 +13,8 @@ $.ajax "http://www.bitterbrown.com/prolific/countme.php"
 
 class prolific
 
+  customMatchers: {}
+
   routines: {}
   add_routines: ->
     if arguments.length is 2 then @routines[arguments[0]] = arguments[1] else @routines[name] = routine for name,routine of arguments[0]
@@ -164,7 +166,7 @@ class prolific
           @fail conf if res is testVal
 
       "is|isnt":
-        reg: /(.+) (is|isnt) (?!(greater than|lower than|called))(.+)/
+        reg: /^(.+) (is|isnt) (?!(greater than|lower than|called))(.+)/
         get: "$1,$4"
         var: "$2"
         err: (conf)->
@@ -293,7 +295,8 @@ class prolific
       do preActions unless wasRoutine
 
       for assertion in _assertions when not wasRoutine
-        matcherObj = finder assertion, matchers
+        matcherObj = finder assertion, @customMatchers
+        matcherObj = finder assertion, matchers unless matcherObj?
 
         throw Error "Prolific bad expression '#{assertion}'" if not matcherObj?
         waits timer*1000 if timer > 0

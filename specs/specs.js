@@ -348,11 +348,26 @@ describe("Prolific matchers", function() {
       return expect(found.vars[0]).toBe("isnt");
     });
   });
-  return describe("matcher 'is <query>'", function() {
+  describe("matcher 'is <query>'", function() {
     return it("should catch '$(query) is .classname' assumption", function() {
       var found;
       found = instance.finder("$ .ciccio-pasticcio is .ciccio-pasticcio", instance.matchers);
       return expect(found.vars[0]).toBe("is");
+    });
+  });
+  return describe("add custom matcher", function() {
+    return it("should be able to add a custom matcher", function() {
+      prolific.prototype.customMatchers["a divisible by"] = {
+        reg: /^(.+) is divisible by (.+)$/,
+        get: "$1",
+        "var": "$2",
+        act: function(conf) {
+          if (conf.subjects[0] % conf.vars[0] !== 0) {
+            return this.fail(conf, "Module should be 0, but is " + (conf.subjects[0] % conf.vars[0]));
+          }
+        }
+      };
+      return assume("6 is divisible by 3");
     });
   });
 });

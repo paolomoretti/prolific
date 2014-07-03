@@ -77,3 +77,17 @@ describe "Prolific matchers", ->
 
       expect(found.vars[0]).toBe "is"
 
+
+  describe "add custom matcher", ->
+
+    it "should be able to add a custom matcher", ->
+      prolific::customMatchers["a divisible by"] =
+        reg: /^(.+) is divisible by (.+)$/
+        get: "$1"
+        var: "$2"
+        act: (conf)->
+          @fail conf, "Module should be 0, but is #{conf.subjects[0]%conf.vars[0]}" if conf.subjects[0]%conf.vars[0] isnt 0
+
+      assume "6 is divisible by 3"
+
+
