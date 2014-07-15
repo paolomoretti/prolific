@@ -202,6 +202,9 @@ prolific = (function() {
         get: "$1",
         "var": "$2",
         act: function(conf) {
+          if (conf[0] == null) {
+            this.fail(conf, "it doesn't seem to be an element");
+          }
           if (conf.vars[0] === "is") {
             if (args[0].length === 0) {
               this.fail(conf);

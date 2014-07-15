@@ -148,6 +148,7 @@ class prolific
         get: "$1"
         var: "$2"
         act: (conf)->
+          @fail conf, "it doesn't seem to be an element" if not conf[0]?
           if conf.vars[0] is "is"
             @fail conf if args[0].length is 0
           if conf.vars[0] is "isnt"
