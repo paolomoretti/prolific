@@ -78,6 +78,19 @@ describe "Prolific matchers", ->
       expect(found.vars[0]).toBe "is"
 
 
+  describe "matcher 'contains'", ->
+
+    it "should catch var foo contains 'bar' assumption", ->
+      found = instance.finder "'this is my text' contains 'my'", instance.matchers
+
+      expect(found.vars[0]).toBe "contains"
+
+    it "should catch 'doesn't contains' assumption", ->
+      found = instance.finder "'this is my text' doesn't contain 'foo'", instance.matchers
+
+      expect(found.vars[0]).toBe "doesn't contain"
+
+
   describe "add custom matcher", ->
 
     it "should be able to add a custom matcher", ->

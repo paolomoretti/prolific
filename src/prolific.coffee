@@ -129,6 +129,16 @@ class prolific
             $(conf.vars[1]).trigger(conf.vars[0])
             new prolific().test conf.subjects[0], @options
 
+      "contains|doesnt contain":
+        reg: /^(.+) (contains|doesn't contain) (.+)/
+        get: "$1,$3"
+        var: "$2"
+        act: (conf)->
+          if conf.vars[0] is "contains"
+            @fail conf, "#{args[0]} doesn't contains #{args[1]}" if args[0].indexOf(args[1]) is -1
+          else
+            @fail conf, "#{args[0]} contains #{args[1]}" if args[0].indexOf(args[1]) isnt -1
+
       "is greater|lower than":
         reg: /^(.+) is (greater|lower|>|<) than (.+)$/
         get: "$1,$3"

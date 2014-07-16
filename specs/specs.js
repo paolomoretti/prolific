@@ -49,6 +49,12 @@ describe("Prolific assume", function() {
     assume("$('.test') is #test");
     return assume("var $('.test').size() is 1");
   });
+  it("should be able to check if contains", function() {
+    assume("'my text' contains 'y t'");
+    assume("'foo bar' doesn't contain 'pippo'");
+    testme = "my testing text";
+    return assume("var testme contains 'my t'");
+  });
   it("should be able to test 'is|isnt an element' assumptions", function() {
     assume("$ .ciccio-pasticcio isnt an element");
     assume(function() {
@@ -353,6 +359,18 @@ describe("Prolific matchers", function() {
       var found;
       found = instance.finder("$ .ciccio-pasticcio is .ciccio-pasticcio", instance.matchers);
       return expect(found.vars[0]).toBe("is");
+    });
+  });
+  describe("matcher 'contains'", function() {
+    it("should catch var foo contains 'bar' assumption", function() {
+      var found;
+      found = instance.finder("'this is my text' contains 'my'", instance.matchers);
+      return expect(found.vars[0]).toBe("contains");
+    });
+    return it("should catch 'doesn't contains' assumption", function() {
+      var found;
+      found = instance.finder("'this is my text' doesn't contain 'foo'", instance.matchers);
+      return expect(found.vars[0]).toBe("doesn't contain");
     });
   });
   return describe("add custom matcher", function() {

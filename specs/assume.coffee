@@ -54,6 +54,14 @@ describe "Prolific assume", ->
     assume "$('.test') is #test"
     assume "var $('.test').size() is 1"
 
+  it "should be able to check if contains", ->
+    assume "'my text' contains 'y t'"
+    assume "'foo bar' doesn't contain 'pippo'"
+
+    testme = "my testing text"
+
+    assume "var testme contains 'my t'"
+
   it "should be able to test 'is|isnt an element' assumptions", ->
     assume "$ .ciccio-pasticcio isnt an element"
 
@@ -151,18 +159,6 @@ describe "Prolific assume", ->
       , 1000
 
     assume "on click #testEventDelayed then in 1 seconds var c is 'clicked delayed'"
-#
-#  it "should be able to assign a value", ->
-#    assume "set var x with value 8 and var x is 8"
-#    assume "set var x with value '8' and var x is '8'"
-#
-#    $("body").prepend $("<input class='assignclass'/>")
-#    assume "set $ .assignclass with attr name = 'my name'"
-#    assume "$ .assignclass is [name='my name']"
-#    assume "set $ .assignclass with val = var x and var $('.assignclass').val() is '8'"
-#    assume "on focus .assignclass then set $ .assignclass with css border = '1px solid red'"
-#
-#    runs -> $(".assignclass").remove()
 
   it "should be able to wait for a condition before testing", ->
     a = b = 0

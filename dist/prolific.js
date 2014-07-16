@@ -173,6 +173,22 @@ prolific = (function() {
           }
         }
       },
+      "contains|doesnt contain": {
+        reg: /^(.+) (contains|doesn't contain) (.+)/,
+        get: "$1,$3",
+        "var": "$2",
+        act: function(conf) {
+          if (conf.vars[0] === "contains") {
+            if (args[0].indexOf(args[1]) === -1) {
+              return this.fail(conf, "" + args[0] + " doesn't contains " + args[1]);
+            }
+          } else {
+            if (args[0].indexOf(args[1]) !== -1) {
+              return this.fail(conf, "" + args[0] + " contains " + args[1]);
+            }
+          }
+        }
+      },
       "is greater|lower than": {
         reg: /^(.+) is (greater|lower|>|<) than (.+)$/,
         get: "$1,$3",
