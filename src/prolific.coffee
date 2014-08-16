@@ -1,3 +1,6 @@
+#TODO Add check for defined variable (ex: var testvar is defined)
+
+
 # Bootstrap
 throw Error "Prolific must be included after jasmine js file" if not beforeEach?
 throw Error "Prolific doesn't support Jasmine version >= 2.0.0" if jasmine? and jasmine.version? and jasmine.version.major > 1
