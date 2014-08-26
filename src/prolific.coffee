@@ -178,6 +178,15 @@ class prolific
 
           @fail conf if res is testVal
 
+      "is|isnt defined":
+        reg: /^(.+) (is|isnt) defined$/
+        get: "$1"
+        var: "$2"
+        err: (conf)->
+          "#{args[0]} #{(if conf.vars[0] is "is" then "isnt" else "is")} defined"
+        act: (conf)->
+          @fail conf if (args[0] is undefined and conf.vars[0] is "is") or (args[0] isnt undefined and conf.vars[0] is "isnt")
+
       "is|isnt":
         reg: /^(.+) (is|isnt) (?!(greater than|lower than|called))(.+)/
         get: "$1,$4"

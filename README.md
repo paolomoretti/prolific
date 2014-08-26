@@ -133,7 +133,9 @@ A sentence is generally made out of a matcher, or more then one if a variable *a
   *Usage:* 
   `assume "4 is greater then 3"`,
   `assume "3 is lower then 5"`,
-  `assume "5 is > then 3"`
+  `assume "5 is > then 3"`,
+  `assume "var notDefined is undefined"`,
+  `assume "var isDefined is defined"`,
 
 - **METHOD SPY**
 

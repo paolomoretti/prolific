@@ -246,6 +246,19 @@ prolific = (function() {
           }
         }
       },
+      "is|isnt defined": {
+        reg: /^(.+) (is|isnt) defined$/,
+        get: "$1",
+        "var": "$2",
+        err: function(conf) {
+          return "" + args[0] + " " + (conf.vars[0] === "is" ? "isnt" : "is") + " defined";
+        },
+        act: function(conf) {
+          if ((args[0] === void 0 && conf.vars[0] === "is") || (args[0] !== void 0 && conf.vars[0] === "isnt")) {
+            return this.fail(conf);
+          }
+        }
+      },
       "is|isnt": {
         reg: /^(.+) (is|isnt) (?!(greater than|lower than|called))(.+)/,
         get: "$1,$4",

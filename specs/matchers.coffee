@@ -54,6 +54,12 @@ describe "Prolific matchers", ->
 
       expect(found).not.toBeDefined()
 
+    it "should catch var is defined", ->
+      found = instance.finder "var pippo isnt defined", instance.matchers
+
+      expect(found.vars[0]).toBe "isnt"
+      expect(found.vars[1]).toBe undefined
+
 
   describe "matcher 'is|isnt an element'", ->
 

@@ -47,6 +47,9 @@ describe "Prolific assume", ->
     assume "var testfalse isnt undefined"
     assume "var testfalse isnt null"
 
+    assume "var testfalse is defined"
+    assume "var notDefinedVar isnt defined"
+
     $("body").append $('<div class="test" id="test"></div>')
 
     assume "$ .test is .test"

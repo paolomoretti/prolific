@@ -43,6 +43,8 @@ describe("Prolific assume", function() {
     assume("var testfalse isnt true");
     assume("var testfalse isnt undefined");
     assume("var testfalse isnt null");
+    assume("var testfalse is defined");
+    assume("var notDefinedVar isnt defined");
     $("body").append($('<div class="test" id="test"></div>'));
     assume("$ .test is .test");
     assume("$ .test is $ .test");
@@ -224,7 +226,7 @@ var instance;
 instance = new prolific();
 
 describe("Prolific getters", function() {
-  return describe("- var", function() {
+  describe("var", function() {
     it("should catch variable name", function() {
       var found;
       found = instance.finder("var gettest", instance.getters);
@@ -260,6 +262,28 @@ describe("Prolific getters", function() {
       found = instance.finder("var (4/2) * testmath - returnFive()", instance.getters);
       expect(found.name).toBe("var");
       return expect(found.item.act(found)).toEqual(1);
+    });
+  });
+  return describe("Reserved", function() {
+    it("should catch undefined", function() {
+      var found;
+      found = instance.finder("undefined", instance.getters);
+      return expect(found.name).toBe("reserved");
+    });
+    it("should catch null", function() {
+      var found;
+      found = instance.finder("null", instance.getters);
+      return expect(found.name).toBe("reserved");
+    });
+    it("should catch false", function() {
+      var found;
+      found = instance.finder("false", instance.getters);
+      return expect(found.name).toBe("reserved");
+    });
+    return it("should catch true", function() {
+      var found;
+      found = instance.finder("true", instance.getters);
+      return expect(found.name).toBe("reserved");
     });
   });
 });
@@ -334,10 +358,16 @@ describe("Prolific matchers", function() {
       expect(found.item).toBe(instance.matchers["is|isnt"]);
       return expect(found.vars[0]).toBe("isnt");
     });
-    return it("should not catch 'a equal to b' assumption", function() {
+    it("should not catch 'a equal to b' assumption", function() {
       var found;
       found = instance.finder("a equal to b", instance.matchers);
       return expect(found).not.toBeDefined();
+    });
+    return it("should catch var is defined", function() {
+      var found;
+      found = instance.finder("var pippo isnt defined", instance.matchers);
+      expect(found.vars[0]).toBe("isnt");
+      return expect(found.vars[1]).toBe(void 0);
     });
   });
   describe("matcher 'is|isnt an element'", function() {

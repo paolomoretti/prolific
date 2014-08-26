@@ -2,7 +2,7 @@ instance = new prolific()
 
 describe "Prolific getters", ->
 
-  describe "- var", ->
+  describe "var", ->
 
     it "should catch variable name", ->
       found = instance.finder "var gettest", instance.getters
@@ -36,3 +36,25 @@ describe "Prolific getters", ->
 
       expect(found.name).toBe "var"
       expect(found.item.act(found)).toEqual 1
+
+  describe "Reserved", ->
+
+    it "should catch undefined", ->
+      found = instance.finder "undefined", instance.getters
+
+      expect(found.name).toBe "reserved"
+
+    it "should catch null", ->
+      found = instance.finder "null", instance.getters
+
+      expect(found.name).toBe "reserved"
+
+    it "should catch false", ->
+      found = instance.finder "false", instance.getters
+
+      expect(found.name).toBe "reserved"
+
+    it "should catch true", ->
+      found = instance.finder "true", instance.getters
+
+      expect(found.name).toBe "reserved"
