@@ -126,7 +126,23 @@ A sentence is generally made out of a matcher, or more then one if a variable *a
   
   If you dont't want to test the type (==), you can use:
   
-  `assume "3 is equal to 3"`
+  `assume "3 is equal to 3"` 
+  
+  You can also test false, undefined, defined, null and true:
+  
+  `assume "var notDefined is undefined"`,
+  `assume "var isDefined is defined"`,
+  `assume "var foo is null"`
+  
+  If the first getter is a jquery element, then you must use a 'jquery filter' expression for comparison: 
+  
+  `assume "$ .classname is :visible"`,
+  `assume "$ .classname is :not(.otherclassname)"`
+  
+  If you want to get specific values for a jquery element, the obvious workaround is to use it as a var:
+  
+  `assume "var $('.classname').size() is 2"`
+  
 
 - **GREATER / LOWER**
   
@@ -134,8 +150,17 @@ A sentence is generally made out of a matcher, or more then one if a variable *a
   `assume "4 is greater then 3"`,
   `assume "3 is lower then 5"`,
   `assume "5 is > then 3"`,
-  `assume "var notDefined is undefined"`,
-  `assume "var isDefined is defined"`,
+
+
+- **STRING CONTAINS**
+
+  *Usage:*
+  `assume "'my string' contains 'y s'"`,
+  `assume "var myString contains 'text'"`,
+  `assume "$ .jquerySelector contains 'my text'"`
+  
+  Since in the last *assume* sentence, the first getter is a jquery element, Prolific is automatically getting the .text() value for comparison
+
 
 - **METHOD SPY**
 
