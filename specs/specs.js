@@ -57,6 +57,10 @@ describe("Prolific assume", function() {
     testme = "my testing text";
     return assume("var testme contains 'my t'");
   });
+  it("should be able to check jquery element text() for contains", function() {
+    $("body").append($('<div class="testContains" id="test">Contains this text</div>'));
+    return assume("$ .testContains contains 'ins this'");
+  });
   it("should be able to test 'is|isnt an element' assumptions", function() {
     assume("$ .ciccio-pasticcio isnt an element");
     assume(function() {

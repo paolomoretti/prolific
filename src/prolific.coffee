@@ -137,6 +137,7 @@ class prolific
         get: "$1,$3"
         var: "$2"
         act: (conf)->
+          args[0] = args[0].text() if schema[0].name is "jqueryshort"
           if conf.vars[0] is "contains"
             @fail conf, "#{args[0]} doesn't contains #{args[1]}" if args[0].indexOf(args[1]) is -1
           else

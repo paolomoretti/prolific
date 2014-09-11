@@ -65,6 +65,11 @@ describe "Prolific assume", ->
 
     assume "var testme contains 'my t'"
 
+  it "should be able to check jquery element text() for contains", ->
+    $("body").append $('<div class="testContains" id="test">Contains this text</div>')
+
+    assume "$ .testContains contains 'ins this'"
+
   it "should be able to test 'is|isnt an element' assumptions", ->
     assume "$ .ciccio-pasticcio isnt an element"
 

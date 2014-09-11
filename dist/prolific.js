@@ -178,6 +178,9 @@ prolific = (function() {
         get: "$1,$3",
         "var": "$2",
         act: function(conf) {
+          if (schema[0].name === "jqueryshort") {
+            args[0] = args[0].text();
+          }
           if (conf.vars[0] === "contains") {
             if (args[0].indexOf(args[1]) === -1) {
               return this.fail(conf, "" + args[0] + " doesn't contains " + args[1]);
