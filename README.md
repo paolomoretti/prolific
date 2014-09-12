@@ -245,7 +245,7 @@ A sentence is generally made out of a matcher, or more then one if a variable *a
   `assume "var getElementMethod() is an element"`
   
     
-####Add custom matcher
+####How to add custom matcher
 
 I you have a particular need, you can add a custom matcher:
 
