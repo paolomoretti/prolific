@@ -97,6 +97,23 @@ describe "Prolific matchers", ->
       expect(found.vars[0]).toBe "doesn't contain"
 
 
+  describe "matcher for mocks", ->
+
+    it "should catch 'method window.foo is mocked'", ->
+      window.foo = -> console.log "foo"
+
+      found = instance.finder "method window.foo is mocked", instance.matchers
+
+      expect(found.item).toBe instance.matchers["mock method"]
+
+    it "should catch 'method window.foo is called'", ->
+      window.foo = -> console.log "foo"
+
+      found = instance.finder "method window.foo is called", instance.matchers
+
+      expect(found.item).toBe instance.matchers["method has been called"]
+
+
   describe "add custom matcher", ->
 
     it "should be able to add a custom matcher", ->

@@ -122,6 +122,26 @@ describe("Prolific assume", function() {
       return foo.bar(13);
     });
   });
+  it("should be able to override and update an existing mock", function() {
+    window.mock = function() {
+      return console.log("foo");
+    };
+    window.mockVar = 0;
+    assume("method window.mock is mocked", function(params) {
+      return window.mockVar++;
+    });
+    runs(function() {
+      return window.mock('test args');
+    });
+    assume("var mockVar is 1");
+    assume("method window.mock is mocked!", function(params) {
+      return window.mockVar--;
+    });
+    runs(function() {
+      return window.mock('test args');
+    });
+    return assume("var mockVar is 0");
+  });
   it("should trigger an event and then test", function() {
     var t;
     t = $("<div id='testEvent'></div>").on("click", function() {
@@ -405,6 +425,24 @@ describe("Prolific matchers", function() {
       var found;
       found = instance.finder("'this is my text' doesn't contain 'foo'", instance.matchers);
       return expect(found.vars[0]).toBe("doesn't contain");
+    });
+  });
+  describe("matcher for mocks", function() {
+    it("should catch 'method window.foo is mocked'", function() {
+      var found;
+      window.foo = function() {
+        return console.log("foo");
+      };
+      found = instance.finder("method window.foo is mocked", instance.matchers);
+      return expect(found.item).toBe(instance.matchers["mock method"]);
+    });
+    return it("should catch 'method window.foo is called'", function() {
+      var found;
+      window.foo = function() {
+        return console.log("foo");
+      };
+      found = instance.finder("method window.foo is called", instance.matchers);
+      return expect(found.item).toBe(instance.matchers["method has been called"]);
     });
   });
   return describe("add custom matcher", function() {

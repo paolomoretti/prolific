@@ -87,12 +87,15 @@ class prolific
             when /[\d]+ times/ then expect(spy.calls.length).toBe parseInt(conf.vars[2], 10)
 
       "mock method":
-        reg: /^method ([A-Za-z\.]+) is (mock|mocked)$/
+        reg: /^method ([A-Za-z\.]+) is (?:mock|mocked)(\!|)$/
         get: "$1"
+        var: "$2"
         act: (conf)->
           _t = conf.subjects[0].split(".")
           _m = _t.pop()
           eval("var _o = #{_t.join(".")}")
+
+          _o[_m].isSpy = false if jasmine.isSpy(_o[_m]) and conf.vars[0] is "!"
 
           if not jasmine.isSpy _o[_m]
             spy = spyOn(_o, _m) if _o isnt null

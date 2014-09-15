@@ -133,6 +133,25 @@ describe "Prolific assume", ->
     assume "method foo.bar is called and in .3 seconds var window.b is 13", ->
       foo.bar 13
 
+  it "should be able to override and update an existing mock", ->
+    window.mock = -> console.log "foo"
+    window.mockVar = 0
+
+    assume "method window.mock is mocked", (params)->
+      window.mockVar++
+
+    runs -> window.mock 'test args'
+
+    assume "var mockVar is 1"
+
+    # Now try to override
+    assume "method window.mock is mocked!", (params)->
+      window.mockVar--
+
+    runs -> window.mock 'test args'
+
+    assume "var mockVar is 0"
+
   it "should trigger an event and then test", ->
     t = $("<div id='testEvent'></div>").on "click", ->
       window.b = "clicked"

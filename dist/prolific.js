@@ -128,13 +128,17 @@ prolific = (function() {
         }
       },
       "mock method": {
-        reg: /^method ([A-Za-z\.]+) is (mock|mocked)$/,
+        reg: /^method ([A-Za-z\.]+) is (?:mock|mocked)(\!|)$/,
         get: "$1",
+        "var": "$2",
         act: function(conf) {
           var spy, _m, _t;
           _t = conf.subjects[0].split(".");
           _m = _t.pop();
           eval("var _o = " + (_t.join(".")));
+          if (jasmine.isSpy(_o[_m]) && conf.vars[0] === "!") {
+            _o[_m].isSpy = false;
+          }
           if (!jasmine.isSpy(_o[_m])) {
             if (_o !== null) {
               spy = spyOn(_o, _m);

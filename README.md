@@ -207,6 +207,14 @@ A sentence is generally made out of a matcher, or more then one if a variable *a
   	do param.success
    ``` 
    
+  You can easily update the mock behaviour by adding **!** at the end
+  
+  ```   
+  assume "method jQuery.ajax is mocked!", (params)->
+  	do param.error
+  ``` 
+  
+   
 - **METHOD THROW**
 
   *Usage:* 
